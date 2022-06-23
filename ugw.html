@@ -13,21 +13,21 @@
       }
 
       .circle {
-          width: 100px;
-          height: 100px;
+          width: 80px;
+          height: 80px;
           background-color: lightgrey;
           border-radius: 50%;
 
       }
 
       .square {
-          width: 100px;
-          height: 100px;
+          width: 80px;
+          height: 80px;
           background-color: lightgrey;
       }
 
       .led {
-          margin-right: 100px;
+          margin-right: 50px;
       }
 
       .led:last-child {
@@ -40,6 +40,19 @@
         justify-content: center;
       }
 
+      .column {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        float: left;
+        margin-right: 20px;
+        min-width: 200px
+      }
+
+      span {
+        margin-bottom: 20px;
+      }
+
       a {
         background-color: lightgrey;
         padding: 16px 16px;
@@ -50,6 +63,17 @@
         border-radius: 4px;
         transition: all .5s ease;
       }
+
+      a.inactive {
+        color: grey;
+        cursor: default;
+      }
+      
+      a.inactive:hover {
+        background-color: lightgrey;
+
+      }
+
 
       a:last-child {
         margin-right: 0px;
@@ -152,62 +176,99 @@
         <div id="1" class="led circle off"></div>
         <div id="2" class="led circle off"></div>
         <div id="3" class="led circle off"></div>
-      </div>
-      <div class="flex-container">
         <div id="4" class="led square off"></div>
         <div id="5" class="led square off"></div>
       </div>
       <div class="flex-container">
         <form name="state">
-          <input type="radio" id="unprovisioned" name="system" value="unprovisioned" checked="checked">
-          <label for="unprovisioned">unprovisioned</label>
-          <input type="radio" id="provisioned" name="system" value="provisioned">
-          <label for="provisioned">provisioned</label>
-          <input type="radio" id="bootloader" name="system" value="bootloader">
-          <label for="bootloader">bootloader</label>
-          <input type="radio" id="error" name="system" value="error">
-          <label for="error">error</label>
-          <br><br>
+          <div class="column">
+            <h2>System</h2>
+            <span>
+              <input type="radio" id="unprovisioned" name="system" value="unprovisioned" checked="checked">
+              <label for="unprovisioned">unprovisioned</label>
+            </span>
+            <span>
+              <input type="radio" id="provisioned" name="system" value="provisioned">
+              <label for="provisioned">provisioned</label>
+            </span>
+            <span>
+              <input type="radio" id="bootloader" name="system" value="bootloader">
+              <label for="bootloader">bootloader</label>
+            </span>
 
-          <input type="radio" id="not-configured" name="configuration" value="not-configured" checked="checked">
-          <label for="not-configured">not configured</label>
-          <input type="radio" id="configured" name="configuration" value="configured">
-          <label for="configured">configured</label>
-          <input type="radio" id="misconfigured" name="configuration" value="misconfigured">
-          <label for="misconfigured">misconfigured</label>
-          <br><br>
+            <span>
+              <input type="radio" id="error" name="system" value="error">
+              <label for="error">error</label>
+            </span>
+          </div>
 
-          <input type="radio" id="disconnected" name="connection" value="disconnected" checked="checked">
-          <label for="disconnected">disconnected</label>
-          <input type="radio" id="ethernet" name="connection" value="ethernet">
-          <label for="ethernet">ethernet</label>
-          <input type="radio" id="cloud" name="connection" value="cloud">
-          <label for="cloud">cloud</label>
-          <input type="radio" id="timeout" name="connection" value="timeout">
-          <label for="timeout">timeout</label>
-          <input type="radio" id="clouderror" name="connection" value="clouderror">
-          <label for="clouderror">cloud error</label>
-          
-          <br><br>
+          <div class="column">
+            <h2>Configuration</h2>
+            <span>
+              <input type="radio" id="not-configured" name="configuration" value="not-configured" checked="checked">
+              <label for="not-configured">not configured</label>
+            </span>
+            <span>
+              <input type="radio" id="configured" name="configuration" value="configured">
+              <label for="configured">configured</label>
+            </span>
+            <span>
+              <input type="radio" id="misconfigured" name="configuration" value="misconfigured">
+              <label for="misconfigured">misconfigured</label>
+            </span>
+          </div>
 
-          <input type="radio" id="outofrange" name="mesh" value="outofrange" checked="checked">
-          <label for="outofrange">out of range</label>
-          <input type="radio" id="inrange" name="mesh" value="inrange">
-          <label for="inrange">in range</label>
-          <input type="radio" id="activity" name="mesh" value="activity">
-          <label for="activity">activity</label>
+          <div class="column">
+            <h2>Connection</h2>
+            <span>
+              <input type="radio" id="disconnected" name="connection" value="disconnected" checked="checked">
+              <label for="disconnected">disconnected</label>
+            </span>
+            <span>
+              <input type="radio" id="ethernet" name="connection" value="ethernet">
+              <label for="ethernet">ethernet</label>
+            </span>
+            <span>
+              <input type="radio" id="cloud" name="connection" value="cloud">
+              <label for="cloud">cloud</label>
+            </span>
+            <span>
+              <input type="radio" id="timeout" name="connection" value="timeout">
+              <label for="timeout">timeout</label>
+            </span>
+            <span>
+             <input type="radio" id="clouderror" name="connection" value="clouderror">
+              <label for="clouderror">cloud error</label>
+            </span>
+          </div>
+
+          <div class="column">
+            <h2>Mesh</h2>
+            <span>
+              <input type="radio" id="outofrange" name="mesh" value="outofrange" checked="checked">
+              <label for="outofrange">out of range</label>
+            </span>
+            <span>
+              <input type="radio" id="inrange" name="mesh" value="inrange">
+             <label for="inrange">in range</label>
+            </span>
+            <span>
+              <input type="radio" id="activity" name="mesh" value="activity">
+              <label for="activity">activity</label>
+            </span>
+          </div>
 
         </form>
       </div>
       <div class="flex-container">
-        <a href="#" class="button" onClick="off()">Off</a>
-        <a href="#" class="button" onClick="on()">On</a>
-        <a href="#" class="button" onClick="attention()">Attention</a>
-        <a href="#" class="button" onClick="provision()">Provision</a>
-        <a href="#" class="button" onClick="configure()">Configure</a>
-        <a href="#" class="button" onClick="misconfigure()">Misconfigure</a>
-        <a href="#" class="button" onClick="connect()">Connect</a>
-        <a href="#" class="button" onClick="disconnect()">Disconnect</a>
+        <a href="#" class="button" id="off">Off</a>
+        <a href="#" class="button" id="on">On</a>
+        <a href="#" class="button" id="attention">Attention</a>
+        <a href="#" class="button" id="provision">Provision</a>
+        <a href="#" class="button" id="configure">Configure</a>
+        <a href="#" class="button" id="misconfigure">Misconfigure</a>
+        <a href="#" class="button" id="connect">Connect</a>
+        <a href="#" class="button" id="disconnect">Disconnect</a>
       </div>
 
     </main>
@@ -227,8 +288,6 @@
       var lastTimeout;
 
       var state = document.forms["state"];
-      console.log(state.system.value);
-      console.log(state.configuration.value);
 
       function clear(){
         led1.className = "led circle";
@@ -237,6 +296,13 @@
         led4.className = "led square";
         led5.className = "led square";
       }
+
+      document.addEventListener('click', function(e) {
+        if (e.target.className == "button") {
+          console.log(e.target.id);
+          window[e.target.id]();
+        }
+      }, false);
 
       function on() {
 
@@ -291,7 +357,6 @@
           led.classList.add("off");
         });
         lastState = "off";
-
       }
 
 
