@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Status LEDs</title>
     <style>
-      main{
+      main {
         margin: 3rem 0;
         text-align: center;
         color: black; 
@@ -51,6 +51,11 @@
 
       .column:last-child {
         margin-right: 0px;
+      }
+
+      p {
+        font-size: 0.9em;
+        margin-bottom: 2em;
       }
 
       span {
@@ -172,8 +177,6 @@
         background 1s 0s;
       }
 
-
-
     </style>
   </head>
   <body>
@@ -190,6 +193,7 @@
         <form name="state">
           <div class="column">
             <h2>System</h2>
+            <p>Select before pressing ON</p>
             <span>
               <input type="radio" id="unprovisioned" name="system" value="unprovisioned" checked="checked">
               <label for="unprovisioned">unprovisioned</label>
@@ -211,6 +215,7 @@
 
           <div class="column">
             <h2>Configuration</h2>
+            <p>Select before pressing ON</p>
             <span>
               <input type="radio" id="not-configured" name="configuration" value="not-configured" checked="checked">
               <label for="not-configured">not configured</label>
@@ -227,6 +232,7 @@
 
           <div class="column">
             <h2>Connection</h2>
+            <p>Select before pressing Connect</p>
             <span>
               <input type="radio" id="disconnected" name="connection" value="disconnected" checked="checked">
               <label for="disconnected">disconnected</label>
@@ -251,6 +257,7 @@
 
           <div class="column">
             <h2>Mesh</h2>
+            <p>Change at any moment</p>
             <span>
               <input type="radio" id="outofrange" name="mesh" value="outofrange" checked="checked">
               <label for="outofrange">out of range</label>
@@ -512,8 +519,9 @@
         led4.className = "led square off";
         led5.className = "led square off";
         led2.className = "led circle yellow fadein";
-        
+
         enable(["off","attention", "configure", "misconfigure", "connect"]);
+        connect();
       }
 
 
