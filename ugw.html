@@ -79,7 +79,6 @@
       
       a.inactive:hover {
         background-color: lightgrey;
-
       }
 
 
@@ -270,13 +269,13 @@
       </div>
       <div class="flex-container">
         <a href="#" class="button" id="on">On</a>
-        <a href="#" class="button" id="off">Off</a>
-        <a href="#" class="button" id="attention">Attention</a>
-        <a href="#" class="button" id="provision">Provision</a>
-        <a href="#" class="button" id="configure">Configure</a>
-        <a href="#" class="button" id="misconfigure">Misconfigure</a>
-        <a href="#" class="button" id="connect">Connect</a>
-        <a href="#" class="button" id="disconnect">Disconnect</a>
+        <a href="#" class="button inactive" id="off">Off</a>
+        <a href="#" class="button inactive" id="attention">Attention</a>
+        <a href="#" class="button inactive" id="provision">Provision</a>
+        <a href="#" class="button inactive" id="configure">Configure</a>
+        <a href="#" class="button inactive" id="misconfigure">Misconfigure</a>
+        <a href="#" class="button inactive" id="connect">Connect</a>
+        <a href="#" class="button inactive" id="disconnect">Disconnect</a>
       </div>
 
     </main>
@@ -293,6 +292,7 @@
       var lastState = "off";
       var circles = document.getElementsByClassName("circle");
       var squares = document.getElementsByClassName("square");
+      var buttons = document.getElementsByClassName("button");
       var lastTimeout;
 
       var state = document.forms["state"];
@@ -358,6 +358,19 @@
         
       }
 
+      function enable (buttonsIds) {
+
+        Array.from(buttons).forEach((button) => {
+          button.className = "button inactive";
+        });
+
+        Array.from(buttonsIds).forEach((buttonId) => {
+          button = document.getElementById(buttonId);
+          button.className = "button";
+        });
+
+      }
+
       function off(){
         clearTimeout(lastTimeout);
         clear();
@@ -365,6 +378,7 @@
           led.classList.add("off");
         });
         lastState = "off";
+        enable(["on"]);
       }
 
 
@@ -389,6 +403,7 @@
         led3.className = "led circle off";
         state.system.value = "unprovisioned";
         lastState = "unprovisioned";
+        enable(["off","attention", "provision"]);
       }
 
       function provisioned(){
@@ -398,6 +413,7 @@
         led3.className = "led circle yellow fadein";
         state.system.value = "provisioned";
         lastState = "provisioned";
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function configured(){
@@ -408,6 +424,7 @@
 
         lastState = "configured";
         state.configuration.value = "configured";
+        enable(["off","attention", "configure", "misconfigure", "connect"]);
       }
 
       function bluetooth(){
@@ -449,6 +466,7 @@
         led3.className = "led circle yellow fadein";
         state.configuration.value = "misconfigured";
         lastState = "misconfigured";
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function cloud(){
@@ -457,6 +475,7 @@
         led2.className = "led circle green-blinking activity infinite";
         led4.className = "led square green fadein";
         led5.className = "led square green fadein";
+        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
       }
 
       function timeout(){
@@ -465,6 +484,7 @@
         led2.className = "led circle red-blinking slow-blinking infinite";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
+        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
       }
 
       function clouderror(){
@@ -473,6 +493,7 @@
         led2.className = "led circle red fadein";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
+        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
       }
 
       function ethernet(){
@@ -481,14 +502,18 @@
         led2.className = "led circle yellow fadein";
         led4.className = "led square green fadein";
         led5.className = "led square off";
+        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
       }
 
       function disconnected(){
         clearTimeout(lastTimeout);
-        led1.className = "led circle green fadein";
-        led2.className = "led circle yellow fadein";
+
+        state.connection.value = "disconnected";
         led4.className = "led square off";
         led5.className = "led square off";
+        led2.className = "led circle yellow fadein";
+        
+        enable(["off","attention", "configure", "misconfigure", "connect"]);
       }
 
 
@@ -617,10 +642,7 @@
 
       function disconnect() {
 
-        state.connection.value = "disconnected";
-        led4.className = "led square off";
-        led5.className = "led square off";
-        led2.className = "led circle yellow fadein";
+        disconnected();
 
       }  
 
