@@ -306,6 +306,8 @@
       var lastState = "off";
       var connection;
 
+      disableForm("configuration");
+
       function clear(){
         led1.className = "led circle";
         led2.className = "led circle";
@@ -322,6 +324,16 @@
           console.log("Button: " + e.target.id);
           window[e.target.id]();
         }
+
+        if (e.target.name == "system") {
+          console.log("Radio: " + e.target.id);
+          if (e.target.id == "unprovisioned") {
+            disableForm("configuration");
+          } else {
+            enableForm("configuration");
+          }
+        }
+
       }, false);
 
       
@@ -331,7 +343,8 @@
         lastState = "on";
         clear();
         enable(["off"]);
-        toggleForm();
+        disableForm("system");
+        disableForm("configuration");
         
 
         if (state.system.value == "error") {
@@ -389,33 +402,26 @@
 
       }
 
-      function toggleForm() {
-        console.log("toggleForm");
+      function enableForm(name) {
+        console.log("enableForm: "+name);
 
-        if (lastState == "off"){
-          inputs = document.getElementsByName("system");
-          Array.from(inputs).forEach((input) => {
-            input.disabled = false; 
-          });
-          inputs = document.getElementsByName("configuration");
-          Array.from(inputs).forEach((input) => {
-            input.disabled = false; 
-          });
+        inputs = document.getElementsByName(name);
 
-        } else {
-
-          inputs = document.getElementsByName("system");
-          Array.from(inputs).forEach((input) => {
-            input.disabled = true; 
-          });
-          inputs = document.getElementsByName("configuration");
-          Array.from(inputs).forEach((input) => {
-            input.disabled = true; 
-          });
-
-        }
-
+        Array.from(inputs).forEach((input) => {
+          input.disabled = false;
+        });
       }
+
+      function disableForm(name) {
+        console.log("disableForm: "+name);
+
+        inputs = document.getElementsByName(name);
+
+        Array.from(inputs).forEach((input) => {
+          input.disabled = true
+        });
+      }
+
 
       function off(){
         console.log("off");
@@ -426,7 +432,8 @@
         lastState = "off";
         enable(["on"]);
         connection = "off";
-        toggleForm();
+        enableForm("system");
+        enableForm("configuration");
       }
 
 
