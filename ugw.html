@@ -679,17 +679,15 @@
 
             }
 
-            
+            setTimeout(function() {
+
+                connect();
+
+            },5000);       
 
           }
 
           connection = state.connection.value;
-
-          setTimeout(function() {
-
-              connect();
-
-          },5000);
 
 
         }
