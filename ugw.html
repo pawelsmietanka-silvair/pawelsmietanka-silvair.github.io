@@ -45,8 +45,7 @@
         flex-direction: column;
         text-align: left;
         float: left;
-        margin-right: 20px;
-        min-width: 200px
+        margin-right: 50px;
       }
 
       .column:last-child {
@@ -293,14 +292,14 @@
       var led2 = document.getElementById("2");
       var led3 = document.getElementById("3");
       var led4 = document.getElementById("4");
-      var led5 = document.getElementById("5");
-      var lastState = "off";
+      var led5 = document.getElementById("5");      
       var circles = document.getElementsByClassName("circle");
       var squares = document.getElementsByClassName("square");
       var buttons = document.getElementsByClassName("button");
       var lastTimeout;
 
       var state = document.forms["state"];
+      var lastState = "off";
       var connection = state.connection.value;
 
       function clear(){
@@ -318,12 +317,20 @@
         }
       }, false);
 
+      
+
       function on() {
+
+        lastState = "on";
+
+        enable(["off"]);
+
         console.log("on");
 
         clearTimeout(lastTimeout);
+
+        toggleForm();
         
-        off();
 
         if (state.system.value == "error") {
         
@@ -378,6 +385,41 @@
 
       }
 
+      function toggleForm() {
+        console.log("toggleForm");
+
+        if (lastState == "off"){
+
+          inputs = document.getElementsByName("system");
+
+          Array.from(inputs).forEach((input) => {
+            input.disabled = false; 
+          });
+
+          inputs = document.getElementsByName("configuration");
+
+          Array.from(inputs).forEach((input) => {
+            input.disabled = false; 
+          });
+
+        } else {
+
+          inputs = document.getElementsByName("system");
+
+          Array.from(inputs).forEach((input) => {
+            input.disabled = true; 
+          });
+
+          inputs = document.getElementsByName("configuration");
+
+          Array.from(inputs).forEach((input) => {
+            input.disabled = true; 
+          });
+
+        }
+
+      }
+
       function off(){
         console.log("off");
         clearTimeout(lastTimeout);
@@ -387,6 +429,7 @@
         });
         lastState = "off";
         enable(["on"]);
+        toggleForm();
       }
 
 
@@ -397,6 +440,7 @@
         led1.className = "led circle red-blinking slow-blinking infinite";
         state.system.value = "bootloader";
         lastState = "bootloader";
+        enable(["off"]);
       }
       
       function error(){
@@ -404,6 +448,7 @@
         led1.className = "led circle red fadein";
         state.system.value = "error";
         lastState = "error";
+        enable(["off"]);
       }   
 
       function unprovisioned(){
@@ -436,7 +481,7 @@
 
         lastState = "configured";
         state.configuration.value = "configured";
-        enable(["off","attention", "configure", "misconfigure", "connect"]);
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function bluetooth(){
@@ -489,7 +534,7 @@
         led2.className = "led circle green-blinking activity infinite";
         led4.className = "led square green fadein";
         led5.className = "led square green fadein";
-        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function timeout(){
@@ -499,7 +544,7 @@
         led2.className = "led circle red-blinking slow-blinking infinite";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
-        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function clouderror(){
@@ -509,7 +554,7 @@
         led2.className = "led circle red fadein";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
-        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function ethernet(){
@@ -519,7 +564,7 @@
         led2.className = "led circle yellow fadein";
         led4.className = "led square green fadein";
         led5.className = "led square off";
-        enable(["off","attention", "configure", "misconfigure", "disconnect"]);
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function disconnected(){
@@ -530,7 +575,7 @@
         led5.className = "led square off";
         led2.className = "led circle yellow fadein";
 
-        enable(["off","attention", "configure", "misconfigure", "connect"]);
+        enable(["off","attention", "configure", "misconfigure"]);
       }
 
 
@@ -659,12 +704,6 @@
 
       }
 
-      function disconnect() {
-        console.log("disconnect");
-
-        disconnected();
-
-      }  
 
   </script>
 </html>
