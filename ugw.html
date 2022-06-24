@@ -299,9 +299,12 @@
       var buttons = document.getElementsByClassName("button");
       var lastTimeout;
 
+      var bluetoothRefresh;
+      var connectionRefresh;
+
       var state = document.forms["state"];
       var lastState = "off";
-      var connection = state.connection.value;
+      var connection;
 
       function clear(){
         led1.className = "led circle";
@@ -309,6 +312,9 @@
         led3.className = "led circle";
         led4.className = "led square";
         led5.className = "led square";
+        clearTimeout(lastTimeout);
+        clearTimeout(bluetoothRefresh);
+        clearTimeout(connectionRefresh);
       }
 
       document.addEventListener('click', function(e) {
@@ -321,15 +327,10 @@
       
 
       function on() {
-
-        lastState = "on";
-
-        enable(["off"]);
-
         console.log("on");
-
-        clearTimeout(lastTimeout);
-
+        lastState = "on";
+        clear();
+        enable(["off"]);
         toggleForm();
         
 
@@ -355,6 +356,7 @@
 
                 configured();
                 connect();
+                bluetooth();
               
               } else if (state.configuration.value == "misconfigured") {
                 
@@ -391,15 +393,11 @@
         console.log("toggleForm");
 
         if (lastState == "off"){
-
           inputs = document.getElementsByName("system");
-
           Array.from(inputs).forEach((input) => {
             input.disabled = false; 
           });
-
           inputs = document.getElementsByName("configuration");
-
           Array.from(inputs).forEach((input) => {
             input.disabled = false; 
           });
@@ -407,13 +405,10 @@
         } else {
 
           inputs = document.getElementsByName("system");
-
           Array.from(inputs).forEach((input) => {
             input.disabled = true; 
           });
-
           inputs = document.getElementsByName("configuration");
-
           Array.from(inputs).forEach((input) => {
             input.disabled = true; 
           });
@@ -424,13 +419,13 @@
 
       function off(){
         console.log("off");
-        clearTimeout(lastTimeout);
         clear();
         Array.from(leds).forEach((led) => {
           led.classList.add("off");
         });
         lastState = "off";
         enable(["on"]);
+        connection = "off";
         toggleForm();
       }
 
@@ -478,8 +473,7 @@
       function configured(){
         console.log("configured");
         led1.className = "led circle green fadein";
-        led2.className = "led circle yellow fadein";
-        bluetooth();
+        //led2.className = "led circle yellow fadein";
         lastState = "configured";
         state.configuration.value = "configured";
         enable(["off","attention", "configure", "misconfigure", "update"]);
@@ -490,10 +484,13 @@
       function misconfigured(){
         console.log("misconfigured");
         clearTimeout(lastTimeout);
-        provisioned();
+        clear();
         led1.className = "led circle yellow fadein";
         led2.className = "led circle yellow fadein";
         led3.className = "led circle yellow fadein";
+        led4.className = "led square";
+        led5.className = "led square";
+        connection = "off";
         state.configuration.value = "misconfigured";
         lastState = "misconfigured";
         enable(["off","attention", "configure", "misconfigure", "update"]);
@@ -548,14 +545,22 @@
       //functions
 
       function attention(){
-        console.log("attention");
+        console.log("attention start -----------------------------------");        
+        clearTimeout(bluetoothRefresh);
+        clearTimeout(connectionRefresh);
         clearTimeout(lastTimeout);
+
         Array.from(circles).forEach((led) => {
           led.className = "led circle off";
           led.className = "led circle green-blinking slow-blinking infinite";
         });
+
         lastTimeout = setTimeout(function() {
+          console.log("attention finish -----------------------------------");
           window[lastState]();
+          window[state.connection.value]();
+          connect();
+          bluetooth();       
         },5000);   
       }
 
@@ -572,29 +577,29 @@
 
       function configure(){
         console.log("configure");
+        clearTimeout(bluetoothRefresh);
+        clearTimeout(connectionRefresh);
         clearTimeout(lastTimeout);
         window[lastState]();
         led3.className = "led circle blue-blinking activity infinite";
         lastTimeout = setTimeout(function() {
-          if (state.system.value == "unprovisioned") {
-            provisioned();
-          }
           led3.className = "led circle blue-blinking activity infinite";
           lastTimeout = setTimeout(function() {
             configured();
             connect();
+            bluetooth();
           },2000);
         },1000);
       }
 
       function misconfigure(){
         console.log("misconfigure");
+        clearTimeout(bluetoothRefresh);
+        clearTimeout(connectionRefresh);
         clearTimeout(lastTimeout);
+        window[lastState]();
         led3.className = "led circle blue-blinking activity infinite";
         lastTimeout = setTimeout(function() {
-          if (state.system.value == "unprovisioned") {
-            provisioned();
-          }
           led3.className = "led circle blue-blinking activity infinite";
           lastTimeout = setTimeout(function() {
             misconfigured();
@@ -605,7 +610,6 @@
       function update() {
         
         console.log("update");
-        clearTimeout(lastTimeout);
 
         enable(["off"]);
 
@@ -614,10 +618,10 @@
         led1.className = "led circle yellow-blinking slow-blinking infinite";
         led3.className = "led circle blue-blinking activity infinite";
 
-        setTimeout(function() {
-          state.system.value = "provisioned";
+        lastTimeout = setTimeout(function() {
+          if (state.system.value == "bootloader") state.system.value = "provisioned";
+          off();
           on();
-
         },5000);
 
       }
@@ -625,7 +629,12 @@
 
       function connect() {
 
+        clearTimeout(connectionRefresh);
+
         console.log("connect");
+        console.log("LastState: "+lastState);
+        console.log("Connection: "+connection);
+
 
         if (lastState != "off") {
 
@@ -641,61 +650,41 @@
 
             } else {
 
-
               if (connection != "cloud") {
 
-                  led4.className = "led square green fadein";
-
-                  led5.className = "led square yellow-blinking fast-blinking infinite";
-
-                }
-
-
-              if (state.connection.value == "cloud") {
+                led4.className = "led square green fadein";
+                led5.className = "led square yellow-blinking fast-blinking infinite";
 
                 lastTimeout = setTimeout(function() {
-
-                  cloud();
-
+                  window[state.connection.value]();
                 },3000);
 
-              } else if (state.connection.value == "clouderror") {
+              } else {
 
-                lastTimeout = setTimeout(function() {
-
-                    clouderror();
-
-                },3000);
-
-              } else if (state.connection.value == "timeout") {
-
-                lastTimeout = setTimeout(function() {
-
-                    timeout();
-
-                },3000);
-
+                window[state.connection.value]();
+              
               }
 
             }
 
-            setTimeout(function() {
+            connection = state.connection.value;
 
+            connectionRefresh = setTimeout(function() {
+                
+                console.log("connectionRefresh");
                 connect();
-
-            },5000);       
+            
+            },5000);
 
           }
-
-          connection = state.connection.value;
-
-
+          
         }
-        
 
       }
 
       function bluetooth(){
+
+        clearTimeout(bluetoothRefresh);
 
         console.log("bluetooth");
 
@@ -718,9 +707,13 @@
             }
           }
 
-          setTimeout(function() {
+          bluetoothRefresh = setTimeout(function() {
+
+            console.log("bluetoothRefresh");
+
             bluetooth();
-          },3000);
+          
+          },5000);
 
         }
         
