@@ -551,9 +551,13 @@
         clearTimeout(lastTimeout);
 
         Array.from(circles).forEach((led) => {
-          led.className = "led circle off";
-          led.className = "led circle green-blinking slow-blinking infinite";
+          led.className = "led circle off";          
         });
+
+        Array.from(circles).forEach((led) => {
+          led.className = "led circle green-blinking slow-blinking infinite";          
+        });
+        
 
         lastTimeout = setTimeout(function() {
           console.log("attention finish -----------------------------------");
