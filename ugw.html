@@ -280,6 +280,7 @@
         <a href="#" class="button inactive" id="provision">Provision</a>
         <a href="#" class="button inactive" id="configure">Configure</a>
         <a href="#" class="button inactive" id="misconfigure">Misconfigure</a>
+        <a href="#" class="button inactive" id="update">Update</a>
       </div>
 
     </main>
@@ -373,6 +374,7 @@
       }
 
       function enable (buttonsIds) {
+        console.log("enable " + buttonsIds);
 
         Array.from(buttons).forEach((button) => {
           button.className = "button inactive";
@@ -440,7 +442,7 @@
         led1.className = "led circle red-blinking slow-blinking infinite";
         state.system.value = "bootloader";
         lastState = "bootloader";
-        enable(["off"]);
+        enable(["off", "update"]);
       }
       
       function error(){
@@ -459,7 +461,7 @@
         led3.className = "led circle off";
         state.system.value = "unprovisioned";
         lastState = "unprovisioned";
-        enable(["off","attention", "provision"]);
+        enable(["off","attention", "provision", "update"]);
       }
 
       function provisioned(){
@@ -470,7 +472,7 @@
         led3.className = "led circle yellow fadein";
         state.system.value = "provisioned";
         lastState = "provisioned";
-        enable(["off","attention", "configure", "misconfigure"]);
+        enable(["off","attention", "configure", "misconfigure", "update"]);
       }
 
       function configured(){
@@ -478,42 +480,12 @@
         led1.className = "led circle green fadein";
         led2.className = "led circle yellow fadein";
         bluetooth();
-
         lastState = "configured";
         state.configuration.value = "configured";
-        enable(["off","attention", "configure", "misconfigure"]);
+        enable(["off","attention", "configure", "misconfigure", "update"]);
       }
 
-      function bluetooth(){
-
-        console.log("bluetooth");
-
-        if (lastState != "off") {
-
-          if (state.system.value == "provisioned" && state.configuration.value == "configured") {
-
-            if (state.mesh.value == "outofrange") {
-
-              led3.className = "led circle yellow fadein";
-
-            } else if (state.mesh.value == "inrange") {
-
-              led3.className = "led circle blue fadein";
-            
-            } else if (state.mesh.value == "activity") {
-            
-              led3.className = "led circle blue-blinking activity infinite";
-            
-            }
-          }
-
-          setTimeout(function() {
-            bluetooth();
-          },3000);
-
-        }
-        
-      }
+      
 
       function misconfigured(){
         console.log("misconfigured");
@@ -524,7 +496,7 @@
         led3.className = "led circle yellow fadein";
         state.configuration.value = "misconfigured";
         lastState = "misconfigured";
-        enable(["off","attention", "configure", "misconfigure"]);
+        enable(["off","attention", "configure", "misconfigure", "update"]);
       }
 
       function cloud(){
@@ -534,7 +506,6 @@
         led2.className = "led circle green-blinking activity infinite";
         led4.className = "led square green fadein";
         led5.className = "led square green fadein";
-        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function timeout(){
@@ -544,7 +515,6 @@
         led2.className = "led circle red-blinking slow-blinking infinite";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
-        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function clouderror(){
@@ -554,7 +524,6 @@
         led2.className = "led circle red fadein";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
-        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function ethernet(){
@@ -564,7 +533,6 @@
         led2.className = "led circle yellow fadein";
         led4.className = "led square green fadein";
         led5.className = "led square off";
-        enable(["off","attention", "configure", "misconfigure"]);
       }
 
       function disconnected(){
@@ -574,8 +542,6 @@
         led4.className = "led square off";
         led5.className = "led square off";
         led2.className = "led circle yellow fadein";
-
-        enable(["off","attention", "configure", "misconfigure"]);
       }
 
 
@@ -636,72 +602,130 @@
         },1000);
       }
 
-
-      function connect() {
-        console.log("connect");
-
+      function update() {
+        
+        console.log("update");
         clearTimeout(lastTimeout);
 
-        if (state.system.value == "provisioned" && state.configuration.value == "configured") {
+        enable(["off"]);
 
-          if (state.connection.value == "disconnected") {
+        clear();
 
-            disconnected();
+        led1.className = "led circle yellow-blinking slow-blinking infinite";
+        led3.className = "led circle blue-blinking activity infinite";
 
-          } else if (state.connection.value == "ethernet") {
+        setTimeout(function() {
+          state.system.value = "provisioned";
+          on();
 
-            ethernet();
+        },5000);
 
-          } else {
+      }
 
 
-            if (connection != "cloud") {
+      function connect() {
 
-                led4.className = "led square green fadein";
+        console.log("connect");
 
-                led5.className = "led square yellow-blinking fast-blinking infinite";
+        if (lastState != "off") {
+
+          if (state.system.value == "provisioned" && state.configuration.value == "configured") {
+
+            if (state.connection.value == "disconnected") {
+
+              disconnected();
+
+            } else if (state.connection.value == "ethernet") {
+
+              ethernet();
+
+            } else {
+
+
+              if (connection != "cloud") {
+
+                  led4.className = "led square green fadein";
+
+                  led5.className = "led square yellow-blinking fast-blinking infinite";
+
+                }
+
+
+              if (state.connection.value == "cloud") {
+
+                lastTimeout = setTimeout(function() {
+
+                  cloud();
+
+                },3000);
+
+              } else if (state.connection.value == "clouderror") {
+
+                lastTimeout = setTimeout(function() {
+
+                    clouderror();
+
+                },3000);
+
+              } else if (state.connection.value == "timeout") {
+
+                lastTimeout = setTimeout(function() {
+
+                    timeout();
+
+                },3000);
 
               }
 
-
-            if (state.connection.value == "cloud") {
-
-              lastTimeout = setTimeout(function() {
-
-                cloud();
-
-              },3000);
-
-            } else if (state.connection.value == "clouderror") {
-
-              lastTimeout = setTimeout(function() {
-
-                  clouderror();
-
-              },3000);
-
-            } else if (state.connection.value == "timeout") {
-
-              lastTimeout = setTimeout(function() {
-
-                  timeout();
-
-              },3000);
-
             }
 
-          }       
+            
+
+          }
+
+          connection = state.connection.value;
+
+          setTimeout(function() {
+
+              connect();
+
+          },5000);
+
+
         }
-
-        connection = state.connection.value;
-
-        setTimeout(function() {
-
-          connect();
-
-        },5000);
         
 
+      }
+
+      function bluetooth(){
+
+        console.log("bluetooth");
+
+        if (lastState != "off") {
+
+          if (state.system.value == "provisioned" && state.configuration.value == "configured") {
+
+            if (state.mesh.value == "outofrange") {
+
+              led3.className = "led circle yellow fadein";
+
+            } else if (state.mesh.value == "inrange") {
+
+              led3.className = "led circle blue fadein";
+            
+            } else if (state.mesh.value == "activity") {
+            
+              led3.className = "led circle blue-blinking activity infinite";
+            
+            }
+          }
+
+          setTimeout(function() {
+            bluetooth();
+          },3000);
+
+        }
+        
       }
 
 
