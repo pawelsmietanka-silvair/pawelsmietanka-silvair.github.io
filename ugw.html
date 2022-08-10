@@ -26,11 +26,13 @@
           background-color: lightgrey;
       }
 
-      .led {
+
+      .led, .header {
+          width: 80px;
           margin-right: 50px;
       }
 
-      .led:last-child {
+      .led:last-child, .header:last-child {
         margin-right: 0px;
       }
 
@@ -157,7 +159,7 @@
       }
 
       .fast-blinking {
-        animation-duration: .2s;
+        animation-duration: .3s;
         animation-direction: alternate;
         animation-timing-function:  ease;
       }
@@ -181,6 +183,13 @@
   <body>
     <main>
       <h1>Status LEDs</h1>
+      <div class="flex-container">
+        <div class="header">System</div>
+        <div class="header">Cloud</div>
+        <div class="header">Bluetooth</div>
+        <div class="header">Ethernet</div>
+        <div class="header">Internet</div>
+      </div>
       <div class="flex-container">
         <div id="1" class="led circle off"></div>
         <div id="2" class="led circle off"></div>
@@ -216,7 +225,7 @@
             <h2>Configuration</h2>
             <p>Select before pressing ON</p>
             <span>
-              <input type="radio" id="not-configured" name="configuration" value="not-configured" checked="checked">
+              <input type="radio" id="notconfigured" name="configuration" value="notconfigured" checked="checked">
               <label for="not-configured">not configured</label>
             </span>
             <span>
@@ -336,57 +345,6 @@
 
       }, false);
 
-      
-
-      function on() {
-        console.log("on");
-        lastState = "on";
-        clear();
-        enable(["off"]);
-        disableForm("system");
-        disableForm("configuration");
-        
-
-        if (state.system.value == "error") {
-        
-          error();
-        
-        } else {
-
-          led1.className = "led circle yellow-blinking fast-blinking infinite";
-
-          lastTimeout = setTimeout(function() {
-
-            if (state.system.value == "unprovisioned") {
-              
-              unprovisioned();
-
-            } else if (state.system.value == "provisioned"){
-
-              provisioned();
-
-              if (state.configuration.value == "configured") {
-
-                configured();
-                connect();
-                bluetooth();
-              
-              } else if (state.configuration.value == "misconfigured") {
-                
-                misconfigured();
-
-              } 
-
-            } else if (state.system.value == "bootloader") {
-                
-              bootloader();
-
-            }
-          }, 1000);
-
-        }
-        
-      }
 
       function enable (buttonsIds) {
         console.log("enable " + buttonsIds);
@@ -422,9 +380,40 @@
         });
       }
 
+      //states
+
+      function on() {
+        console.log("State: on");
+        lastState = "on";
+        clear();
+        enable(["off"]);
+        disableForm("system");
+        disableForm("configuration");
+
+        if (state.system.value == "error") {
+        
+          error();
+        
+        } else {
+
+          led1.className = "led circle yellow-blinking fast-blinking infinite";
+
+          lastTimeout = setTimeout(function() {
+
+            window[state.system.value]();
+            window[state.configuration.value]();
+            connect();
+            bluetooth();
+
+          }, 1000);
+
+        }
+        
+      }
+
 
       function off(){
-        console.log("off");
+        console.log("State: off");
         clear();
         Array.from(leds).forEach((led) => {
           led.classList.add("off");
@@ -437,10 +426,8 @@
       }
 
 
-      //states
-
       function bootloader(){
-        console.log("bootloader");
+        console.log("State: bootloader");
         led1.className = "led circle red-blinking slow-blinking infinite";
         state.system.value = "bootloader";
         lastState = "bootloader";
@@ -448,7 +435,7 @@
       }
       
       function error(){
-        console.log("error");
+        console.log("State: error");
         led1.className = "led circle red fadein";
         state.system.value = "error";
         lastState = "error";
@@ -456,18 +443,19 @@
       }   
 
       function unprovisioned(){
-        console.log("unprovisioned");
+        console.log("State: unprovisioned");
         clearTimeout(lastTimeout);
         led1.className = "led circle yellow fadein";
         led2.className = "led circle off";
         led3.className = "led circle off";
         state.system.value = "unprovisioned";
         lastState = "unprovisioned";
+        state.configuration.value = "notconfigured";
         enable(["off","attention", "provision", "update"]);
       }
 
       function provisioned(){
-        console.log("provisioned");
+        console.log("State: provisioned");
         clearTimeout(lastTimeout);
         led1.className = "led circle yellow fadein";
         led2.className = "led circle yellow fadein";
@@ -475,21 +463,40 @@
         state.system.value = "provisioned";
         lastState = "provisioned";
         enable(["off","attention", "configure", "misconfigure", "update"]);
+        window[state.configuration.value];
       }
 
       function configured(){
-        console.log("configured");
+        console.log("State: configured");
         led1.className = "led circle green fadein";
-        //led2.className = "led circle yellow fadein";
+        led2.className = "led circle off";
+        led3.className = "led circle off";
         lastState = "configured";
         state.configuration.value = "configured";
         enable(["off","attention", "configure", "misconfigure", "update"]);
       }
 
-      
+      function notconfigured(){
+        console.log("State: notconfigured");
+        led1.className = "led circle yellow fadein";
+        led2.className = "led circle off";
+        led3.className = "led circle off";
+        lastState = "notconfigured";
+        state.configuration.value = "notconfigured";
+        enable(["off","attention", "configure", "misconfigure", "update"]);        
+      }
+
+      function configured(){
+        console.log("State: configured");
+        led1.className = "led circle green fadein";
+        lastState = "configured";
+        state.configuration.value = "configured";
+        enable(["off","attention", "configure", "misconfigure", "update"]);
+      }
+
 
       function misconfigured(){
-        console.log("misconfigured");
+        console.log("State: misconfigured");
         clearTimeout(lastTimeout);
         clear();
         led1.className = "led circle yellow fadein";
@@ -503,10 +510,17 @@
         enable(["off","attention", "configure", "misconfigure", "update"]);
       }
 
-      function cloud(){
-        console.log("cloud");
+      function ethernet(){
+        console.log("State: ethernet");
         clearTimeout(lastTimeout);
-        led1.className = "led circle green fadein";
+        led2.className = "led circle off fadein";
+        led4.className = "led square green fadein";
+        led5.className = "led square off";
+      }
+
+      function cloud(){
+        console.log("State: cloud");
+        clearTimeout(lastTimeout);
         led2.className = "led circle green-blinking activity infinite";
         led4.className = "led square green fadein";
         led5.className = "led square green fadein";
@@ -515,7 +529,6 @@
       function timeout(){
         console.log("timeout");
         clearTimeout(lastTimeout);
-        led1.className = "led circle green fadein";
         led2.className = "led circle red-blinking slow-blinking infinite";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
@@ -524,20 +537,12 @@
       function clouderror(){
         console.log("clouderror");
         clearTimeout(lastTimeout);
-        led1.className = "led circle green fadein";
         led2.className = "led circle red fadein";
         led4.className = "led square green fadein";
         led5.className = "led square yellow fadein";
       }
 
-      function ethernet(){
-        console.log("ethernet");
-        clearTimeout(lastTimeout);
-        led1.className = "led circle green fadein";
-        led2.className = "led circle yellow fadein";
-        led4.className = "led square green fadein";
-        led5.className = "led square off";
-      }
+ 
 
       function disconnected(){
         console.log("disconnected");
@@ -545,7 +550,10 @@
         state.connection.value = "disconnected";
         led4.className = "led square off";
         led5.className = "led square off";
-        led2.className = "led circle yellow fadein";
+        if (state.system.value == "provisioned" && state.configuration.value == "configured") {
+          led2.className = "led circle yellow fadein";
+        }
+        
       }
 
 
@@ -557,14 +565,17 @@
         clearTimeout(connectionRefresh);
         clearTimeout(lastTimeout);
 
-        Array.from(circles).forEach((led) => {
-          led.className = "led circle off";          
-        });
-
-        Array.from(circles).forEach((led) => {
-          led.className = "led circle green-blinking slow-blinking infinite";          
-        });
         
+        setTimeout(function() {
+          led1.className = "led circle off";
+          led2.className = "led circle off";
+          led3.className = "led circle off";
+          setTimeout(function() {
+            led1.className = "led circle yellow-blinking slow-blinking infinite";
+            led2.className = "led circle green-blinking slow-blinking infinite";
+            led3.className = "led circle blue-blinking slow-blinking infinite"; 
+          },50);
+        },50); 
 
         lastTimeout = setTimeout(function() {
           console.log("attention finish -----------------------------------");
@@ -642,52 +653,34 @@
 
         clearTimeout(connectionRefresh);
 
-        console.log("connect");
-        console.log("LastState: "+lastState);
+        console.log("Function: connect");
         console.log("Connection: "+connection);
 
 
-        if (lastState != "off") {
+        if (lastState != "off" && lastState != "bootloader") {
 
-          if (state.system.value == "provisioned" && state.configuration.value == "configured") {
+          if (state.connection.value == "cloud" && connection != "cloud") {
 
-            if (state.connection.value == "disconnected") {
+            led2.className = "led circle green-blinking slow-blinking infinite";
 
-              disconnected();
+            lastTimeout = setTimeout(function() {
+              window[state.connection.value]();
+            },3000);
 
-            } else if (state.connection.value == "ethernet") {
+          } else {
 
-              ethernet();
-
-            } else {
-
-              if (connection != "cloud") {
-
-                led4.className = "led square green fadein";
-                led5.className = "led square yellow-blinking fast-blinking infinite";
-
-                lastTimeout = setTimeout(function() {
-                  window[state.connection.value]();
-                },3000);
-
-              } else {
-
-                window[state.connection.value]();
+            window[state.connection.value]();
               
-              }
-
-            }
-
-            connection = state.connection.value;
-
-            connectionRefresh = setTimeout(function() {
-                
-                console.log("connectionRefresh");
-                connect();
-            
-            },5000);
-
           }
+
+          connection = state.connection.value;
+
+          connectionRefresh = setTimeout(function() {
+                
+            console.log("connectionRefresh");
+            connect();
+            
+          },1000);
           
         }
 
@@ -697,7 +690,7 @@
 
         clearTimeout(bluetoothRefresh);
 
-        console.log("bluetooth");
+        console.log("Function: bluetooth");
 
         if (lastState != "off") {
 
@@ -705,7 +698,7 @@
 
             if (state.mesh.value == "outofrange") {
 
-              led3.className = "led circle yellow fadein";
+              led3.className = "led circle off";
 
             } else if (state.mesh.value == "inrange") {
 
