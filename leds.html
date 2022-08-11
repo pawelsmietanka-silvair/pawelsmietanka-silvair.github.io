@@ -20,8 +20,6 @@
 
       }
 
-
-
       .led, .header {
           width: 80px;
           margin-right: 50px;
@@ -56,39 +54,6 @@
 
       span {
         margin-bottom: 20px;
-      }
-
-      input, label {
-        padding: 5px;
-      }
-
-      a {
-        background-color: lightgrey;
-        padding: 16px 16px;
-        margin-right: 30px;
-        text-decoration: none;
-        color: black;
-        font-weight: bolder;
-        border-radius: 4px;
-        transition: all .5s ease;
-      }
-
-      a.inactive {
-        color: grey;
-        cursor: default;
-      }
-      
-      a.inactive:hover {
-        background-color: lightgrey;
-      }
-
-
-      a:last-child {
-        margin-right: 0px;
-      }
-
-      a:hover {
-        background-color: darkgrey;
       }
 
       @keyframes yellow {
@@ -186,9 +151,9 @@
       <div class="flex-container">
         <div class="header">Off</div>
         <div class="header">On</div>
-        <div class="header">Slow blinking</div>
-        <div class="header">Fast blinking</div>
-        <div class="header">Activity</div>
+        <div class="header">Slow<br><br>800ms, 50%</div>
+        <div class="header">Fast<br><br>300ms, 50%</div>
+        <div class="header">Activity<br><br>100ms, 50%</div>
       </div>
 
     </main>

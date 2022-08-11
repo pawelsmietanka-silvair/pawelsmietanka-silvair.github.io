@@ -154,16 +154,19 @@
 
       .slow-blinking {
         animation-duration: .8s;
+        animation-direction: reverse;
         animation-timing-function:  steps(2,jump-none);
       }
 
       .fast-blinking {
         animation-duration: .3s;
+        animation-direction: reverse;
         animation-timing-function:  steps(2,jump-none);
       }
 
       .activity {
         animation-duration: .1s;
+        animation-direction: reverse;
         animation-timing-function:  steps(2,jump-none);
       }
 
@@ -254,6 +257,10 @@
             <span>
               <input type="radio" id="cloud" name="connection" value="cloud">
               <label for="cloud">Cloud connected</label>
+            </span>
+            <span>
+              <input type="radio" id="cloudactivity" name="connection" value="cloudactivity">
+              <label for="cloudactivity">Cloud activity</label>
             </span>
             <span>
              <input type="radio" id="clouderror" name="connection" value="clouderror">
@@ -437,7 +444,7 @@
       
       function error(){
         console.log("State: error");
-        led1.className = "led circle red fadein";
+        led1.className = "led circle red";
         state.system.value = "error";
         lastState = "error";
         enable(["off"]);
@@ -446,18 +453,20 @@
       function unprovisioned(){
         console.log("State: unprovisioned");
         clearTimeout(lastTimeout);
-        led1.className = "led circle yellow fadein";
+        led1.className = "led circle yellow";
         led2.className = "led circle off";
         led3.className = "led circle off";
         state.system.value = "unprovisioned";
         lastState = "unprovisioned";
         state.configuration.value = "notconfigured";
+        window[state.configuration.value];
         enable(["off","attention", "provision", "update"]);
       }
 
       function provisioned(){
         console.log("State: provisioned");
-        led1.className = "led circle yellow fadein";
+        led1.className = "led circle yellow";
+        led2.className = "led circle off";
         led3.className = "led circle blue-blinking slow-blinking infinite";
         state.system.value = "provisioned";
         lastState = "provisioned";
@@ -467,7 +476,7 @@
 
       function configured(){
         console.log("State: configured");
-        led1.className = "led circle green fadein";
+        led1.className = "led circle green";
         led2.className = "led circle off";
         led3.className = "led circle blue-blinking slow-blinking infinite";
         lastState = "configured";
@@ -477,14 +486,16 @@
 
       function notconfigured(){
         console.log("State: notconfigured");
-        led1.className = "led circle yellow fadein";
+        led1.className = "led circle yellow";
+        led2.className = "led circle off";
+        led3.className = "led circle off";
         lastState = "notconfigured";
         state.configuration.value = "notconfigured"; 
       }
 
       function configured(){
         console.log("State: configured");
-        led1.className = "led circle green fadein";
+        led1.className = "led circle green";
         lastState = "configured";
         state.configuration.value = "configured";
         enable(["off","attention", "configure", "misconfigure", "update"]);
@@ -495,7 +506,8 @@
         console.log("State: misconfigured");
         clearTimeout(lastTimeout);
         clear();
-        led1.className = "led circle yellow fadein";
+        led1.className = "led circle yellow";
+        led2.className = "led circle off";
         led3.className = "led circle blue-blinking slow-blinking infinite";
         connection = "off";
         state.configuration.value = "misconfigured";
@@ -506,8 +518,8 @@
       function ethernet(){
         console.log("State: ethernet");
         clearTimeout(lastTimeout);
-        led2.className = "led circle off fadein";
-        led4.className = "led square green fadein";
+        led2.className = "led circle off";
+        led4.className = "led square green";
         led5.className = "led square off";
         connection = "ethernet";
       }
@@ -515,18 +527,27 @@
       function cloud(){
         console.log("State: cloud");
         clearTimeout(lastTimeout);
-        led2.className = "led circle green-blinking activity infinite";
-        led4.className = "led square green fadein";
-        led5.className = "led square green fadein";
+        led2.className = "led circle green";
+        led4.className = "led square green";
+        led5.className = "led square green";
         connection = "cloud";
+      }
+
+      function cloudactivity(){
+        console.log("State: activity");
+        clearTimeout(lastTimeout);
+        led2.className = "led circle green-blinking activity infinite";
+        led4.className = "led square green";
+        led5.className = "led square green";
+        connection = "cloudactivity";
       }
 
       function timeout(){
         console.log("State: timeout");
         clearTimeout(lastTimeout);
-        led2.className = "led circle off";
-        led4.className = "led square green fadein";
-        led5.className = "led square yellow fadein";
+        led2.className = "led circle green-blinking slow-blinking infinite";
+        led4.className = "led square green";
+        led5.className = "led square yellow";
         connection = "timeout";
       }
 
@@ -535,8 +556,8 @@
         clearTimeout(lastTimeout);
         //led1.className = "led circle red";
         led2.className = "led circle off";
-        led4.className = "led square green fadein";
-        led5.className = "led square yellow fadein";
+        led4.className = "led square green";
+        led5.className = "led square yellow";
         connection = "clouderror";
       }
 
@@ -547,9 +568,8 @@
         led2.className = "led circle off";
         led4.className = "led square off";
         led5.className = "led square off";
-        connection = "disconnected";      
+        connection = "disconnected";   
       }
-
 
       //functions
 
@@ -566,7 +586,7 @@
           led2.className = "led circle off";
           led3.className = "led circle off";
           setTimeout(function() {
-            led1.className = "led circle yellow-blinking slow-blinking infinite";
+            led1.className = "led circle green-blinking slow-blinking infinite";
             led2.className = "led circle green-blinking slow-blinking infinite";
             led3.className = "led circle blue-blinking slow-blinking infinite"; 
           },50);
@@ -633,7 +653,7 @@
 
       function update() {
         
-        console.log("update");
+        console.log("Function: update");
 
         enable(["off"]);
 
@@ -663,30 +683,41 @@
 
         if (lastState != "off") {
 
-          if (connection != state.connection.value && (state.connection.value == "cloud" || state.connection.value == "timeout" || state.connection.value == "clouderror")) {
-            
-            led2.className = "led circle green-blinking slow-blinking infinite";
-            lastTimeout = setTimeout (function() {
+          switch(state.connection.value) {
 
+            case "cloud":
+            case "clouderror":
+            case "timeout":
+            case "cloudactivity":
+
+              if (connection != state.connection.value && (connection != "cloud" || connection != "cloudactivity")) {
+                console.log("dupa");
+                timeout();
+              }
+              
+              lastTimeout = setTimeout(function() {
+                  window[state.connection.value]();
+                  connectionTimeout = setTimeout(function() {
+                    console.log("Function: connectionRefresh");
+                    connect();
+                  },1000);
+              },2000);
+
+            break;
+
+            default: 
               window[state.connection.value]();
-              connectionRefresh();
+              connectionTimeout = setTimeout(function() {
+                console.log("Function: connectionRefresh");
+                connect();
+              },1000);
+            break;
 
-            },3000);
-
-          } else {
-            window[state.connection.value]();
-            connectionRefresh();
           }
+
+          
           
         }
-
-      }
-
-      function connectionRefresh(){
-        console.log("Function: connectionRefresh");
-        connectionTimeout = setTimeout(function() {
-          connect();
-        },1000);
 
       }
 
@@ -701,13 +732,16 @@
           if (state.system.value == "provisioned") {
 
             switch(state.mesh.value) {
-              case "outofrange": led3.className = "led circle blue-blinking slow-blinking infinite";
+              case "outofrange": 
+                led3.className = "led circle blue-blinking slow-blinking infinite";
               break;
 
-              case "inrange": led3.className = "led circle blue fadein";
+              case "inrange": 
+                led3.className = "led circle blue";
               break;
 
-              case "activity": led3.className = "led circle blue-blinking activity infinite";
+              case "activity": 
+                led3.className = "led circle blue-blinking activity infinite";
               break;
             }
           }
