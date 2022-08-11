@@ -295,6 +295,7 @@
         <a href="#" class="button inactive" id="configure">Configure</a>
         <a href="#" class="button inactive" id="misconfigure">Misconfigure</a>
         <a href="#" class="button inactive" id="update">Update</a>
+        <a href="#" class="button inactive" id="reset">Reset</a>
       </div>
 
     </main>
@@ -391,7 +392,7 @@
         console.log("State: on");
         lastState = "on";
         clear();
-        enable(["off"]);
+        enable(["off","reset"]);
         disableForm("system");
         disableForm("configuration");
 
@@ -460,7 +461,7 @@
         lastState = "unprovisioned";
         state.configuration.value = "notconfigured";
         window[state.configuration.value];
-        enable(["off","attention", "provision", "update"]);
+        enable(["off","attention", "provision", "update", "reset"]);
       }
 
       function provisioned(){
@@ -470,7 +471,7 @@
         led3.className = "led circle blue-blinking slow-blinking infinite";
         state.system.value = "provisioned";
         lastState = "provisioned";
-        enable(["off","attention", "configure", "misconfigure", "update"]);
+        enable(["off","attention", "configure", "misconfigure", "update", "reset"]);
         window[state.configuration.value];
       }
 
@@ -481,7 +482,7 @@
         led3.className = "led circle blue-blinking slow-blinking infinite";
         lastState = "configured";
         state.configuration.value = "configured";
-        enable(["off","attention", "configure", "misconfigure", "update"]);
+        enable(["off","attention", "configure", "misconfigure", "update","reset"]);
       }
 
       function notconfigured(){
@@ -490,7 +491,7 @@
         led2.className = "led circle off";
         led3.className = "led circle off";
         lastState = "notconfigured";
-        state.configuration.value = "notconfigured"; 
+        state.configuration.value = "notconfigured";
       }
 
       function configured(){
@@ -498,7 +499,7 @@
         led1.className = "led circle green";
         lastState = "configured";
         state.configuration.value = "configured";
-        enable(["off","attention", "configure", "misconfigure", "update"]);
+        enable(["off","attention", "configure", "misconfigure", "update", "reset"]);
       }
 
 
@@ -512,7 +513,7 @@
         connection = "off";
         state.configuration.value = "misconfigured";
         lastState = "misconfigured";
-        enable(["off","attention", "configure", "misconfigure", "update"]);
+        enable(["off","attention", "configure", "misconfigure", "update", "reset"]);
       }
 
       function ethernet(){
@@ -581,14 +582,14 @@
 
         
 
-          led1.className = "led circle yellow";
-          led2.className = "led circle green";
-          led3.className = "led circle blue";
-          setTimeout(function() {
-            led1.className = "led circle yellow-blinking slow-blinking infinite";
-            led2.className = "led circle green-blinking slow-blinking infinite";
-            led3.className = "led circle blue-blinking slow-blinking infinite"; 
-          },50);
+        led1.className = "led circle yellow";
+        led2.className = "led circle green";
+        led3.className = "led circle blue";
+        setTimeout(function() {
+          led1.className = "led circle yellow-blinking slow-blinking infinite";
+          led2.className = "led circle green-blinking slow-blinking infinite";
+          led3.className = "led circle blue-blinking slow-blinking infinite"; 
+        },50);
 
 
 
@@ -664,6 +665,35 @@
 
         lastTimeout = setTimeout(function() {
           if (state.system.value == "bootloader") state.system.value = "provisioned";
+          off();
+          on();
+        },5000);
+
+      }
+
+      function reset(){
+
+        console.log("Function: reset");
+
+        clear();
+
+
+        clearTimeout(connectionTimeout);
+        clearTimeout(bluetoothTimeout);
+        clearTimeout(lastTimeout);
+        
+        led1.className = "led circle yellow";
+        led2.className = "led circle green";
+        led3.className = "led circle blue";
+        setTimeout(function() {
+          led1.className = "led circle yellow-blinking slow-blinking infinite";
+          led2.className = "led circle green-blinking slow-blinking infinite";
+          led3.className = "led circle blue-blinking slow-blinking infinite"; 
+        },50);
+
+        lastTimeout = setTimeout(function() {
+          state.system.value = "unprovisioned";
+          state.configuration.value = "notconfigured";
           off();
           on();
         },5000);
