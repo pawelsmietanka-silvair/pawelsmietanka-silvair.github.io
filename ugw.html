@@ -673,7 +673,8 @@
               window[state.connection.value]();
               connectionRefresh();
 
-            },3000)
+            },3000);
+
           } else {
             window[state.connection.value]();
             connectionRefresh();
@@ -684,7 +685,7 @@
       }
 
       function connectionRefresh(){
-        console.log("Function connectionRefresh");
+        console.log("Function: connectionRefresh");
         connectionTimeout = setTimeout(function() {
           connect();
         },1000);
@@ -699,26 +700,23 @@
 
         if (lastState != "off") {
 
-          if (state.system.value == "provisioned" && state.configuration.value == "configured") {
+          if (state.system.value == "provisioned") {
 
-            if (state.mesh.value == "outofrange") {
+            switch(state.mesh.value) {
+              case "outofrange": led3.className = "led circle blue-blinking slow-blinking infinite";
+              break;
 
-              led3.className = "led circle blue-blinking slow-blinking infinite";
+              case "inrange": led3.className = "led circle blue fadein";
+              break;
 
-            } else if (state.mesh.value == "inrange") {
-
-              led3.className = "led circle blue fadein";
-            
-            } else if (state.mesh.value == "activity") {
-            
-              led3.className = "led circle blue-blinking activity infinite";
-            
+              case "activity": led3.className = "led circle blue-blinking activity infinite";
+              break;
             }
           }
 
           bluetoothTimeout = setTimeout(function() {
 
-            console.log("bluetoothTimeout");
+            console.log("Function: bluetoothRefresh");
 
             bluetooth();
           
