@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Status LEDs</title>
+    <style>
+      main {
+        margin: 3rem 0;
+        text-align: center;
+        color: black; 
+        font-family: Helvetica, sans-serif;
+      }
+
+      .circle {
+          width: 80px;
+          height: 80px;
+          background-color: lightgrey;
+          border-radius: 50%;
+
+      }
+
+
+
+      .led, .header {
+          width: 80px;
+          margin-right: 50px;
+      }
+
+      .led:last-child, .header:last-child {
+        margin-right: 0px;
+      }
+
+      .flex-container {
+        margin: 3rem 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        float: left;
+        margin-right: 50px;
+      }
+
+      .column:last-child {
+        margin-right: 0px;
+      }
+
+      p {
+        font-size: 0.9em;
+        margin-bottom: 2em;
+      }
+
+      span {
+        margin-bottom: 20px;
+      }
+
+      input, label {
+        padding: 5px;
+      }
+
+      a {
+        background-color: lightgrey;
+        padding: 16px 16px;
+        margin-right: 30px;
+        text-decoration: none;
+        color: black;
+        font-weight: bolder;
+        border-radius: 4px;
+        transition: all .5s ease;
+      }
+
+      a.inactive {
+        color: grey;
+        cursor: default;
+      }
+      
+      a.inactive:hover {
+        background-color: lightgrey;
+      }
+
+
+      a:last-child {
+        margin-right: 0px;
+      }
+
+      a:hover {
+        background-color: darkgrey;
+      }
+
+      @keyframes yellow {
+        from {background-color: lightgrey;}
+        to {background-color: orange;}
+      }
+
+      @keyframes red {
+        from {background-color: lightgrey;}
+        to {background-color: red;}
+      }
+
+      @keyframes green {
+        from {background-color: lightgrey;}
+        to {background-color: green;}
+      }
+
+      @keyframes blue {
+        from {background-color: lightgrey;}
+        to {background-color: blue;}
+      }
+
+      .yellow {
+        background-color: orange;
+      }
+
+      .red {
+        background-color: red;
+      }
+
+      .green {
+        background-color: green;
+      }
+
+      .blue{
+        background-color: blue;
+      }
+
+      .off {
+        background-color: lightgrey;
+      }
+
+      .yellow-blinking {
+        animation-name: yellow;
+      }
+
+      .red-blinking {
+        animation-name: red;
+      }
+
+      .green-blinking {
+        animation-name: green;
+      }
+
+      .blue-blinking {
+        animation-name: blue;
+      }
+
+      .slow-blinking {
+        animation-duration: .8s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .fast-blinking {
+        animation-duration: .3s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .activity {
+        animation-duration: .1s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .infinite {
+        animation-iteration-count: infinite;
+      }
+
+      .fadein {
+        transition: 
+        background 1s 0s;
+      }
+
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Status LEDs</h1>
+      <div class="flex-container">
+        <div id="1" class="led circle off"></div>
+        <div id="2" class="led circle green"></div>
+        <div id="3" class="led circle green-blinking slow-blinking infinite"></div>
+        <div id="4" class="led circle green-blinking fast-blinking infinite"></div>
+        <div id="5" class="led circle green-blinking activity infinite"></div>
+      </div>
+      <div class="flex-container">
+        <div class="header">Off</div>
+        <div class="header">On</div>
+        <div class="header">Slow blinking</div>
+        <div class="header">Fast blinking</div>
+        <div class="header">Activity</div>
+      </div>
+
+    </main>
+  </body>
+  <script>
+
+
+  </script>
+</html>
