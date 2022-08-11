@@ -554,7 +554,6 @@
       function clouderror(){
         console.log("State: clouderror");
         clearTimeout(lastTimeout);
-        //led1.className = "led circle red";
         led2.className = "led circle off";
         led4.className = "led square green";
         led5.className = "led square yellow";
@@ -575,25 +574,26 @@
 
       function attention(){
         console.log("Function: attention");
-        console.log("attention start -----------------------------------");
+        console.log("Attention: start");
         clearTimeout(bluetoothTimeout);
         clearTimeout(connectionTimeout);
         clearTimeout(lastTimeout);
 
         
-        setTimeout(function() {
-          led1.className = "led circle off";
-          led2.className = "led circle off";
-          led3.className = "led circle off";
+
+          led1.className = "led circle yellow";
+          led2.className = "led circle green";
+          led3.className = "led circle blue";
           setTimeout(function() {
-            led1.className = "led circle green-blinking slow-blinking infinite";
+            led1.className = "led circle yellow-blinking slow-blinking infinite";
             led2.className = "led circle green-blinking slow-blinking infinite";
             led3.className = "led circle blue-blinking slow-blinking infinite"; 
           },50);
-        },50); 
+
+
 
         lastTimeout = setTimeout(function() {
-          console.log("attention finish -----------------------------------");
+          console.log("Attention: stop");
           window[lastState]();
           window[state.connection.value]();
           connect();
@@ -729,7 +729,7 @@
 
         if (lastState != "off") {
 
-          if (state.system.value == "provisioned") {
+          if (state.system.value == "provisioned" && state.configuration.value == "configured" ) {
 
             switch(state.mesh.value) {
               case "outofrange": 
