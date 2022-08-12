@@ -675,28 +675,48 @@
 
         console.log("Function: reset");
 
-        clear();
-
-
         clearTimeout(connectionTimeout);
         clearTimeout(bluetoothTimeout);
         clearTimeout(lastTimeout);
         
-        led1.className = "led circle yellow";
-        led2.className = "led circle green";
-        led3.className = "led circle blue";
-        setTimeout(function() {
+        if (led1.className.includes("yellow")) {
+
           led1.className = "led circle yellow-blinking slow-blinking infinite";
-          led2.className = "led circle green-blinking slow-blinking infinite";
-          led3.className = "led circle blue-blinking slow-blinking infinite"; 
-        },50);
+          setTimeout(function() {
+            led1.className = "led circle yellow-blinking fast-blinking infinite";
+            setTimeout(function() {
+              led1.className = "led circle yellow";
+              led2.className = "led circle green";
+              led3.className = "led circle blue";
+              led4.className = "led square green";
+              led5.className = "led square green";
+            },1500);
+          },5000);
+
+
+        } else {
+
+          led1.className = "led circle green-blinking slow-blinking infinite";
+          setTimeout(function() {
+            led1.className = "led circle green-blinking fast-blinking infinite";
+            setTimeout(function() {
+              led1.className = "led circle green";
+              led2.className = "led circle green";
+              led3.className = "led circle blue";
+              led4.className = "led square green";
+              led5.className = "led square green";
+            },1500);
+          },5000);
+
+        }
+      
 
         lastTimeout = setTimeout(function() {
           state.system.value = "unprovisioned";
           state.configuration.value = "notconfigured";
           off();
           on();
-        },5000);
+        },10000);
 
       }
 
