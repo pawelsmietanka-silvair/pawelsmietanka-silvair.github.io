@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Firmware Status LEDs</title>
+    <style>
+      main {
+        margin: 3rem 0;
+        text-align: center;
+        color: black; 
+        font-family: Helvetica, sans-serif;
+      }
+
+      .circle {
+          width: 80px;
+          height: 80px;
+          background-color: lightgrey;
+          border-radius: 50%;
+
+      }
+
+      .led, .header {
+          width: 80px;
+          margin-right: 50px;
+      }
+
+      .led:last-child, .header:last-child {
+        margin-right: 0px;
+      }
+
+      .flex-container {
+        margin: 3rem 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+        float: left;
+        margin-right: 50px;
+      }
+
+      .column:last-child {
+        margin-right: 0px;
+      }
+
+      p {
+        font-size: 0.9em;
+        margin-bottom: 2em;
+      }
+
+      span {
+        margin-bottom: 20px;
+      }
+
+      @keyframes unprovisioned {
+        0%, 10% {background-color: blue;}
+        10.1%, 100% {background-color: lightgrey;}
+      }
+
+      @keyframes noprovisioning {
+        0%, 5% {background-color: blue;}
+        5.1%, 7.5% {background-color: lightgrey;}
+        7.51%, 12.5% {background-color: blue;}
+        12.51%, 100% {background-color: lightgrey;}
+      }
+
+       @keyframes provisioned {
+        0%, 1.5% {background-color: blue;}
+        1.51%, 100% {background-color: lightgrey;}
+      }
+
+
+      @keyframes message {
+        0%, 60% {background-color: blue;}
+        60.1%, 100% {background-color: lightgrey;}
+      }
+
+
+      @keyframes attention {
+        from {background-color: lightgrey;}
+        to {background-color: blue;}
+      }
+
+      @keyframes bootloader {
+        from {background-color: lightgrey;}
+        to {background-color: blue;}
+      }
+
+      .blue {
+        background-color: blue;
+      }
+
+      .off {
+        background-color: lightgrey;
+      }
+
+      .unprovisioned {
+        animation-name: unprovisioned;
+        animation-duration: .3s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+
+      .noprovisioning {
+        animation-name: noprovisioning;
+        animation-duration: 5s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .provisioned {
+        animation-name: provisioned;
+        animation-duration: .8s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .message {
+        animation-name: message;
+        animation-duration: .05s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+
+      .attention {
+        animation-name: attention;
+        animation-duration: 1s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .bootloader {
+        animation-name: bootloader;
+        animation-duration: 0.8s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
+      .infinite {
+        animation-iteration-count: infinite;
+      }
+
+      .fadein {
+        transition: 
+        background 1s 0s;
+      }
+
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Firmware status LEDs</h1>
+      <div class="flex-container">
+        <div id="1" class="led circle unprovisioned infinite"></div>
+        <div id="1" class="led circle noprovisioning infinite"></div>
+        <div id="2" class="led circle provisioned infinite"></div>
+        <div id="3" class="led circle attention infinite"></div>
+        <div id="4" class="led circle message infinite"></div>
+        <div id="4" class="led circle bootloader infinite"></div>
+        <div id="4" class="led circle blue"></div>
+      </div>
+      <div class="flex-container">
+        <div class="header">Unprovisioned</div>
+        <div class="header">Cannot provision</div>
+        <div class="header">Provisioned</div>
+        <div class="header">Attention</div>
+        <div class="header">Activity</div>
+        <div class="header">Bootloader</div>
+        <div class="header">Error</div>
+      </div>
+
+    </main>
+  </body>
+  <script>
+
+
+  </script>
+</html>
