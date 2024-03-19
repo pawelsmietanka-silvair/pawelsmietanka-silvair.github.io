@@ -86,8 +86,8 @@
       }
 
       @keyframes bootloader {
-        from {background-color: lightgrey;}
-        to {background-color: blue;}
+        0%, 20% {background-color: blue;}
+        20.1%, 100% {background-color: lightgrey;}
       }
 
       .blue {
@@ -132,7 +132,7 @@
 
       .bootloader {
         animation-name: bootloader;
-        animation-duration: 0.8s;
+        animation-duration: 5s;
         animation-timing-function:  steps(2,jump-none);
       }
 
