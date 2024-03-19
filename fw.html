@@ -90,6 +90,23 @@
         20.1%, 100% {background-color: lightgrey;}
       }
 
+      @keyframes reset {
+        0%, 10% {background-color: blue;}
+        10%, 11% {background-color: lightgrey;}
+        11%, 20% {background-color: blue;}
+        20%, 21% {background-color: lightgrey;}
+        21%, 30% {background-color: blue;}
+        30%, 31% {background-color: lightgrey;}
+        31%, 40% {background-color: blue;}
+        40%, 41% {background-color: lightgrey;}
+        41%, 42.5% {background-color: blue;}
+        42.5%, 44% {background-color: lightgrey;}
+        44%, 45.5% {background-color: blue;}
+        45.5%, 47% {background-color: lightgrey;}
+        47%, 48.5% {background-color: blue;}
+        48.5%, 100% {background-color: lightgrey;}
+      }
+
       .blue {
         background-color: blue;
       }
@@ -136,6 +153,12 @@
         animation-timing-function:  steps(2,jump-none);
       }
 
+      .reset {
+        animation-name: reset;
+        animation-duration: 10s;
+        animation-timing-function:  steps(2,jump-none);
+      }
+
       .infinite {
         animation-iteration-count: infinite;
       }
@@ -156,8 +179,9 @@
         <div id="2" class="led circle provisioned infinite"></div>
         <div id="3" class="led circle attention infinite"></div>
         <div id="4" class="led circle message infinite"></div>
-        <div id="4" class="led circle bootloader infinite"></div>
-        <div id="4" class="led circle blue"></div>
+        <div id="5" class="led circle bootloader infinite"></div>
+        <div id="6" class="led circle blue"></div>
+        <div id="7" class="led circle reset infinite"></div>
       </div>
       <div class="flex-container">
         <div class="header">Unprovisioned</div>
@@ -167,6 +191,7 @@
         <div class="header">Activity</div>
         <div class="header">Bootloader (new)</div>
         <div class="header">Error (new)</div>
+        <div class="header">Reset</div>
       </div>
 
     </main>
