@@ -61,7 +61,7 @@
         10.1%, 100% {background-color: lightgrey;}
       }
 
-      @keyframes noprovisioning {
+      @keyframes blocked {
         0%, 8% {background-color: blue;}
         8%, 10% {background-color: lightgrey;}
         10%, 18% {background-color: blue;}
@@ -86,8 +86,8 @@
       }
 
       @keyframes bootloader {
-        0%, 20% {background-color: blue;}
-        20.1%, 100% {background-color: lightgrey;}
+        0%, 40% {background-color: blue;}
+        40%, 100% {background-color: lightgrey;}
       }
 
       @keyframes reset {
@@ -120,8 +120,8 @@
       }
 
 
-      .noprovisioning {
-        animation-name: noprovisioning;
+      .blocked {
+        animation-name: blocked;
         animation-duration: 5s;
         animation-timing-function:  steps(2,jump-none);
       }
@@ -173,7 +173,7 @@
       <h1>Firmware status LEDs</h1>
       <div class="flex-container">
         <div id="1" class="led circle unprovisioned infinite"></div>
-        <div id="1" class="led circle noprovisioning infinite"></div>
+        <div id="1" class="led circle blocked infinite"></div>
         <div id="2" class="led circle provisioned infinite"></div>
         <div id="3" class="led circle attention infinite"></div>
         <div id="4" class="led circle message infinite"></div>
