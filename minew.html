@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minew G1-E LED Status Prototype</title>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      text-align: center; 
+      margin: 20px; 
+      background-color: #121212; 
+      color: #EEEEEE;
+    }
+    #led-ring { position: relative; width: 300px; height: 300px; margin: 20px auto; }
+    .led {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000;
+      transition: background 0.3s, opacity 0.3s;
+    }
+    @keyframes rotate-sweep {
+      0% { background: rgba(255,255,255,0.1); }
+      50% { background: rgba(255,255,255,0.8); }
+      100% { background: rgba(255,255,255,0.1); }
+    }
+    @keyframes blink-1hz {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    @keyframes blink-5hz {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    @keyframes strobe-10hz {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .rotate { animation: rotate-sweep 2s linear infinite; }
+    .blink-1hz { animation: blink-1hz 1s step-end infinite; }
+    .blink-5hz { animation: blink-5hz 0.2s step-end infinite; }
+    .strobe-10hz { animation: strobe-10hz 0.1s step-end infinite; }
+    #controls select,
+    #controls button {
+      padding: 8px;
+      margin: 5px;
+      background-color: #333;
+      color: #EEE;
+      border: 1px solid #555;
+      border-radius: 4px;
+    }
+    #controls button:hover {
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>Minew G1-E LED Status Prototype</h1>
+  <div id="led-ring"></div>
+  <div id="controls">
+    <select id="state-select">
+      <option value="OFF">Power Off</option>
+      <option value="BOOTLOADER">Bootloader</option>
+      <option value="BOOTING">System Booting</option>
+      <option value="BACNET_SW_UPDATE">Updating BACnet Software (via USB)</option>
+      <option value="BACNET_CONFIG_UPDATE">Updating BACnet Config (USB)</option>
+      <option value="USB_LOG_BACKUP">Logs Backup to USB (via Button)</option>
+      <option value="BACNET_SERVICE_STARTED">BACnet Service Started</option>
+      <option value="BACNET_REMOTE_CONFIG">Updating BACnet Server Config</option>
+      <option value="UNPROVISIONED">Unprovisioned</option>
+      <option value="PROVISIONED">Provisioned</option>
+      <option value="FULL_OPERATIONAL">Full Operational</option>
+      <option value="LOG_BACKUP_REMOTE">Logs Backup to USB (via BACnet)</option>
+      <option value="REMOTE_RESTART">Restarting Silvair Firmware (BACnet)</option>
+      <option value="RESET_PRESSED">Button Pressed</option>
+      <option value="FACTORY_RESET">Factory Reset</option>
+      <option value="BACNET_ERROR_CFG">BACnet Error - File Missing</option>
+      <option value="BACNET_ERROR_SYNTAX">BACnet Error - Config Syntax</option>
+      <option value="BACNET_ERROR_NORDIC">BACnet Error - Nordic Ping Fail</option>
+      <option value="BACNET_ERROR_CRASH">BACnet Error - Crash</option>
+    </select>
+    <button onclick="applyState()">Apply State</button>
+  </div>
+  <script>
+    const ring = document.getElementById('led-ring');
+    const numLEDs = 24;
+    const leds = [];
+    let walkInterval;
+    const radius = 120;
+    // Create LED elements in a ring
+    for (let i = 0; i < numLEDs; i++) {
+      const led = document.createElement('div');
+      led.classList.add('led');
+      const angle = (i / numLEDs) * Math.PI * 2;
+      const x = radius + Math.cos(angle) * radius - 10;
+      const y = radius + Math.sin(angle) * radius - 10;
+      led.style.left = x + 'px';
+      led.style.top = y + 'px';
+      ring.appendChild(led);
+      leds.push(led);
+    }
+    // State definitions with colors, overlays, animations, and walk
+    const states = {
+      OFF:                { base: '#000000', overlay: [],      anim: '',         walk: false },
+      BOOTLOADER:         { base: 'rainbow',   overlay: [],      anim: '',         walk: false },
+      BOOTING:            { base: '#FFFFFF',   overlay: [],      anim: 'rotate',   walk: false },
+      BACNET_SW_UPDATE:   { base: '#0000FF',   overlay: [],      anim: '',         walk: true, colorDot: '#FFA500' },
+      BACNET_CONFIG_UPDATE:{ base:'#0000FF',   overlay: [],      anim: '',         walk: true, colorDot: '#FFFF00'},
+      USB_LOG_BACKUP:     { base: '#FFFFFF',   overlay: [],      anim: '',         walk: true, colorDot: '#0000FF'},
+      BACNET_SERVICE_STARTED:{base:'#FFA500',  overlay: [],      anim: '',         walk: false},
+      BACNET_REMOTE_CONFIG:{ base:'#FFA500',  overlay: [],      anim: '',         walk: true, colorDot: '#0000FF'},
+      UNPROVISIONED:      { base: '#FFFF00',   overlay: [],      anim: '',         walk: false},
+      PROVISIONED:        { base: '#00FF00',   overlay: [],      anim: '',         walk: false},
+      FULL_OPERATIONAL:   { base: '#008000',   overlay: [],      anim: '',         walk: false},
+      LOG_BACKUP_REMOTE:  { base: '#800080',   overlay: [],      anim: '',         walk: true, colorDot: '#0000FF'},
+      REMOTE_RESTART:     { base: '#800080',   overlay: [],      anim: 'blink-1hz',walk: false},
+      RESET_PRESSED:      { base: '#FFFFFF',   overlay: [],      anim: 'blink-1hz',walk: false},
+      FACTORY_RESET:      { base: '#FFFFFF',   overlay: [],      anim: 'blink-5hz',walk: false},
+      BACNET_ERROR_CFG:   { base: '#FF0000',   overlay: [],      anim: '',         walk: false},
+      BACNET_ERROR_SYNTAX:{ base: '#FF0000',   overlay: [],      anim: '',         walk: false},
+      BACNET_ERROR_NORDIC:{ base: '#FF0000',   overlay: [],      anim: '',         walk: false},
+      BACNET_ERROR_CRASH: { base: '#FF0000',   overlay: [],      anim: '',         walk: false},
+    };
+    function clearWalk() {
+      clearInterval(walkInterval);
+      leds.forEach(led => led.style.background = led.baseColor || '#000');
+    }
+    function applyState() {
+      const sel = document.getElementById('state-select').value;
+      const config = states[sel];
+      // Clear previous intervals and animations
+      clearInterval(walkInterval);
+      leds.forEach(led => {
+        led.classList.remove('rotate', 'blink-1hz', 'blink-5hz', 'strobe-10hz');
+        led.style.opacity = 1;
+      });
+      // Apply base color
+      leds.forEach((led, idx) => {
+        if (config.base === 'rainbow') {
+          led.style.background = `hsl(${(idx/numLEDs)*360},100%,50%)`;
+        } else {
+          led.style.background = config.base;
+        }
+        led.baseColor = led.style.background;
+      });
+      // Handle walking LED
+      if (config.walk) {
+        let pos = 0;
+        walkInterval = setInterval(() => {
+          leds.forEach((led, idx) => led.style.background = led.baseColor);
+          leds[pos].style.background = config.colorDot;
+          pos = (pos + 1) % numLEDs;
+        }, 200);
+      }
+      // Apply animation if specified
+      if (config.anim) {
+        leds.forEach(led => led.classList.add(config.anim));
+      }
+    }
+    // Initialize
+    applyState();
+  </script>
+</body>
+</html>
