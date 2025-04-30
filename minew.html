@@ -78,6 +78,7 @@
       <option value="BACNET_SERVICE_STARTED">BACnet Service Started</option>
       <option value="BACNET_REMOTE_CONFIG">Updating BACnet Server Config (Remote)</option>
       <option value="UNPROVISIONED">Unprovisioned</option>
+      <option value="ATTENTION">Attention</option>
       <option value="PROVISIONED">Provisioned (Idle)</option>
       <option value="FULL_OPERATIONAL">Full Operational</option>
       <option value="LOG_BACKUP_REMOTE">Logs Backup to USB (via BACnet)</option>
@@ -127,6 +128,7 @@
       BACNET_REMOTE_CONFIG:{ base:'#FA0',walk:true, colorDot:'#00F', anim:'' },
       UNPROVISIONED:      { base:'#FF0', walk:false, anim:'' },
       PROVISIONED:        { base:'#0F0', walk:false, anim:'' },
+      ATTENTION:          { base:'#FF0', walk:false, anim:'blink-1hz' },
       FULL_OPERATIONAL:   { base:'#080', walk:false, anim:'' },
       LOG_BACKUP_REMOTE:  { base:'#800080',walk:false, anim:'' },
       REMOTE_RESTART:     { base:'#800080',walk:false, anim:'blink-1hz' },
@@ -170,10 +172,10 @@
     }
 
     const scenarios = {
-      boot:           ['OFF', 'BOOTLOADER', 'BOOTING', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','UNPROVISIONED'],
-      provision:      ['UNPROVISIONED', 'PROVISIONED', 'FULL_OPERATIONAL'],
+      boot:           ['OFF', 'BOOTLOADER', 'BOOTING', 'BACNET_SW_UPDATE', 'BACNET_CONFIG_UPDATE', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','UNPROVISIONED'],
+      provision:      ['UNPROVISIONED', 'ATTENTION', 'PROVISIONED', 'FULL_OPERATIONAL'],
       Bacnetrestart:       ['FULL_OPERATIONAL', 'REMOTE_RESTART', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','UNPROVISIONED'],
-      reset:          ['FULL_OPERATIONAL', 'RESET_PRESSED', 'FACTORY_RESET', 'BOOTLOADER']
+      reset:          ['RESET_PRESSED', 'FACTORY_RESET', 'BOOTLOADER', 'BOOTING', 'BACNET_SERVICE_STARTED', 'UNPROVISIONED']
     };
 
     function runScenario(key) {
@@ -183,7 +185,7 @@
       (function nextStep(i) {
         if (i >= seq.length) return;
         applyState(seq[i]);
-        setTimeout(() => nextStep(i + 1), 1500);
+        setTimeout(() => nextStep(i + 1), 3000);
       })(0);
     }
 
