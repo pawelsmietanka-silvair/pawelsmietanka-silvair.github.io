@@ -157,6 +157,10 @@
         }
         ld.baseColor = ld.style.background;
       });
+      if (cfg.colorDot) {
+        let pos = 0;
+        leds[pos].style.background = cfg.colorDot;
+      }
       if (cfg.walk) {
         let pos = 0;
         walkInterval = setInterval(() => {
