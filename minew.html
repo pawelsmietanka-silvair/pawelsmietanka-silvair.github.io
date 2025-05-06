@@ -76,7 +76,8 @@
       <option value="BACNET_CONFIG_UPDATE">Updating BACnet Config (USB)</option>
       <option value="USB_LOG_BACKUP">Logs Backup to USB (Button)</option>
       <option value="BACNET_SERVICE_STARTED">BACnet Service Started</option>
-      <option value="BACNET_REMOTE_CONFIG">Updating BACnet Server Config (Remote)</option>
+      <option value="BACNET_REMOTE_CONFIG">Updating BACnet Server Config</option>
+      <option value="SILVAIR_FW_STARTING">Silvair firmware starting</option>
       <option value="UNPROVISIONED">Unprovisioned</option>
       <option value="ATTENTION">Attention</option>
       <option value="PROVISIONED">Provisioned (Idle)</option>
@@ -126,11 +127,12 @@
       USB_LOG_BACKUP:     { base:'#800080',walk:true, colorDot:'#FF0', anim:'' },
       BACNET_SERVICE_STARTED:{ base:'#FA0',walk:false, anim:'' },
       BACNET_REMOTE_CONFIG:{ base:'#FA0',walk:true, colorDot:'#00F', anim:'' },
+      SILVAIR_FW_STARTING:{ base:'#FF0', walk:false, anim:'rotate' },
       UNPROVISIONED:      { base:'#FF0', walk:false, anim:'' },
       PROVISIONED:        { base:'#0F0', walk:false, anim:'' },
       ATTENTION:          { base:'#FF0', walk:false, anim:'blink-1hz' },
       FULL_OPERATIONAL:   { base:'#080', walk:false, anim:'' },
-      LOG_BACKUP_REMOTE:  { base:'#800080',walk:false, anim:'' },
+      LOG_BACKUP_REMOTE:  { base:'#800080', colorDot:'#00F', walk:false, anim:'' },
       REMOTE_RESTART:     { base:'#800080',walk:false, anim:'blink-1hz' },
       RESET_PRESSED:      { base:'#FFF', walk:false, anim:'blink-1hz' },
       FACTORY_RESET:      { base:'#FFF', walk:false, anim:'blink-5hz' },
@@ -176,7 +178,7 @@
     }
 
     const scenarios = {
-      boot:           ['OFF', 'BOOTLOADER', 'BOOTING', 'BACNET_SW_UPDATE', 'BACNET_CONFIG_UPDATE', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','UNPROVISIONED'],
+      boot:           ['OFF', 'BOOTLOADER', 'BOOTING', 'BACNET_SW_UPDATE', 'BACNET_CONFIG_UPDATE', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','SILVAIR_FW_STARTING','UNPROVISIONED'],
       provision:      ['UNPROVISIONED', 'ATTENTION', 'PROVISIONED', 'FULL_OPERATIONAL'],
       Bacnetrestart:  ['REMOTE_RESTART', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','UNPROVISIONED'],
       reset:          ['RESET_PRESSED', 'FACTORY_RESET', 'BOOTLOADER', 'BOOTING', 'BACNET_SERVICE_STARTED', 'UNPROVISIONED']
