@@ -97,28 +97,39 @@
       ATTENTION_PROV: { base:'#00FF00', anim:'blink-1hz', walk:false },
       LOG_BACKUP_REMOTE: { base:'#800080', anim:'', walk:true, colorDot:'#0000FF' },
       REMOTE_RESTART: { base:'#800080', anim:'blink-1hz', walk:false },
-      ERROR_SYNTAX: { base:'#FF0000', anim:'', walk:false, colorDot:'#FFA500'},
-      ERROR_CFG: { base:'#FF0000', anim:'', walk:false, colorDot:'#FFA500', dotCount:2 },
-      ERROR_UNRESPONSIVE: { base:'#FF0000', anim:'', walk:false, colorDot:'#00FF00'},
-      ERROR_BACKUP: { base:'#FF0000', anim:'', walk:false, colorDot:'#0000FF'},
-      ERROR_CRASH: { base:'#FF0000', anim:'', walk:false }
+      ERROR_SYNTAX: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000'},
+      ERROR_CFG: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:2 },
+      ERROR_UNRESPONSIVE: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:3 },
+      ERROR_BACKUP: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:4}
     };
-    function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
+function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
     function applyState(name){
       clearTimers();
       const cfg = states[name];
-      leds.forEach(ld=>{ ld.className='led'; ld.style.opacity=1; });
+      leds.forEach(ld=>{ ld.className='led'; ld.style.opacity=1; ld.style.boxShadow='none'; });
       leds.forEach((ld,i)=>{
         ld.style.background = cfg.base==='rainbow' ? `hsl(${i/24*360},100%,50%)` : cfg.base;
         ld.baseColor = ld.style.background;
       });
       // Static dot overlay for non-walking states
-      if (!cfg.anim && cfg.colorDot) {
+      if (!cfg.walk && cfg.colorDot) {
+        const hex = cfg.colorDot.replace('#','');
+        const r = parseInt(hex.substr(0,2),16);
+        const g = parseInt(hex.substr(2,2),16);
+        const b = parseInt(hex.substr(4,2),16);
         const count = cfg.dotCount || 1;
         for (let k=0; k<count; k++) {
-          // evenly spaced dots: LED positions at multiples of 24/count
           const idx = Math.floor(k*(numLEDs/count)) % numLEDs;
+          // center
           leds[idx].style.background = cfg.colorDot;
+          leds[idx].style.boxShadow = `0 0 12px 6px ${cfg.colorDot}`;
+          // diffusion neighbors
+          [1,2].forEach(d=>{
+            const intensity = d===1?0.5:0.25;
+            [ (idx+d)%numLEDs, (idx-d+numLEDs)%numLEDs ].forEach(n=>{
+              leds[n].style.background = `rgba(${r},${g},${b},${intensity})`;
+            });
+          });
         }
       }
       // Moving dot logic
@@ -126,9 +137,8 @@
         let pos = 0;
         walkInterval = setInterval(() => {
           leds.forEach(ld=>ld.style.background = ld.baseColor);
-          // place dot(s)
           const count = cfg.dotCount || 1;
-          for (let k=0;k<count;k++) {
+          for (let k=0; k<count; k++) {
             const idx = (pos + Math.floor(k*(numLEDs/count))) % numLEDs;
             leds[idx].style.background = cfg.colorDot;
           }
