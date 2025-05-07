@@ -5,61 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minew G1-E LED Status Prototype</title>
   <style>
-    body { 
-      font-family: sans-serif; 
-      text-align: center; 
-      margin: 20px; 
-      background-color: #121212; 
-      color: #EEEEEE;
-    }
+    body { font-family: sans-serif; text-align: center; margin: 20px; background-color: #121212; color: #EEEEEE; }
     #led-ring { position: relative; width: 300px; height: 300px; margin: 20px auto; }
-    .led {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #000;
-      transition: background 0.3s, opacity 0.3s;
-    }
-    @keyframes rotate-sweep {
-      0% { background: rgba(255,255,255,0.1); }
-      50% { background: rgba(255,255,255,0.8); }
-      100% { background: rgba(255,255,255,0.1); }
-    }
-    @keyframes blink-1hz {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-    @keyframes blink-5hz {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-    @keyframes strobe-10hz {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-    .rotate { animation: rotate-sweep 2s linear infinite; }
-    .blink-1hz { animation: blink-1hz 1s step-end infinite; }
-    .blink-5hz { animation: blink-5hz 0.2s step-end infinite; }
+    .led { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #000; transition: background 0.3s, opacity 0.3s; }
+    @keyframes rotate-sweep { 0% { background: rgba(255,255,255,0.1); } 50% { background: rgba(255,255,255,0.8); } 100% { background: rgba(255,255,255,0.1); } }
+    @keyframes blink-1hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+    @keyframes blink-5hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+    @keyframes strobe-10hz { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    .rotate      { animation: rotate-sweep 2s linear infinite; }
+    .blink-1hz   { animation: blink-1hz   1s step-end infinite; }
+    .blink-5hz   { animation: blink-5hz   0.2s step-end infinite; }
     .strobe-10hz { animation: strobe-10hz 0.1s step-end infinite; }
-    #controls select,
-    #controls button {
-      padding: 8px;
-      margin: 5px;
-      background-color: #333;
-      color: #EEE;
-      border: 1px solid #555;
-      border-radius: 4px;
-    }
+    .pulse       { animation: pulse 2s ease-in-out infinite; }
+    #controls select, #controls button { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; }
     #controls button:hover { background-color: #444; }
-    #scenarios button {
-      padding: 6px 12px;
-      margin: 4px;
-      background: #222;
-      color: #EEE;
-      border: 1px solid #555;
-      border-radius: 4px;
-    }
+    #scenarios button { padding: 6px 12px; margin: 4px; background: #222; color: #EEE; border: 1px solid #555; border-radius: 4px; }
     #scenarios button:hover { background: #333; }
   </style>
 </head>
@@ -71,25 +32,27 @@
     <select id="state-select">
       <option value="OFF">Power Off</option>
       <option value="BOOTLOADER">Bootloader</option>
-      <option value="BOOTING">System Booting</option>
-      <option value="BACNET_SW_UPDATE">Updating BACnet Software (USB)</option>
-      <option value="BACNET_CONFIG_UPDATE">Updating BACnet Config (USB)</option>
-      <option value="USB_LOG_BACKUP">Logs Backup to USB (Button)</option>
-      <option value="BACNET_SERVICE_STARTED">BACnet Service Started</option>
-      <option value="BACNET_REMOTE_CONFIG">Updating BACnet Server Config</option>
-      <option value="SILVAIR_FW_STARTING">Silvair firmware starting</option>
+      <option value="STARTUP_MAINTENANCE">Startup Maintenance Starting</option>
+      <option value="BACNET_CONFIG_UPDATE">Updating BACnet configuration file </option>
+      <option value="BACNET_SW_UPDATE">Updating BACnet software</option>
+      <option value="BACNET_SWCONFIG_UPDATE">Updating BACnet configuration file and software</option>
+      <option value="NO_ACTION">No action</option>
+      <option value="RESET_FACTORY">Resetting to factory settings</option>
+      <option value="LOG_BACKUP_LOCAL">Logs backup to USB (button press)</option>
+      <option value="BACNET_SERVICE_STARTING">BACnet service starting</option>
+      <option value="BACNET_SERVER_CONFIGURING">Updating BACnet server configuration</option>
       <option value="UNPROVISIONED">Unprovisioned</option>
-      <option value="ATTENTION">Attention</option>
-      <option value="PROVISIONED">Provisioned (Idle)</option>
-      <option value="FULL_OPERATIONAL">Full Operational</option>
-      <option value="LOG_BACKUP_REMOTE">Logs Backup to USB (via BACnet)</option>
-      <option value="REMOTE_RESTART">Restarting Silvair Firmware (BACnet)</option>
-      <option value="RESET_PRESSED">Reset Button Pressed</option>
-      <option value="FACTORY_RESET">Factory Reset</option>
-      <option value="BACNET_ERROR_CFG">BACnet Error - File Missing</option>
-      <option value="BACNET_ERROR_SYNTAX">BACnet Error - Config Syntax</option>
-      <option value="BACNET_ERROR_NORDIC">BACnet Error - Nordic Ping Fail</option>
-      <option value="BACNET_ERROR_CRASH">BACnet Error - Crash</option>
+      <option value="ATTENTION_UNPROV">Attention in Unprovisioned</option>
+      <option value="PROVISIONED">Provisioned</option>
+      <option value="FULL_OPERATIONAL">Full operational</option>
+      <option value="ATTENTION_PROV">Attention in Provisioned</option>
+      <option value="LOG_BACKUP_REMOTE">Logs backup to USB (via BACnet command)</option>
+      <option value="REMOTE_RESTART">Restarting Silvair firmware</option>
+      <option value="ERROR_SYNTAX">Configuration file error</option>
+      <option value="ERROR_CFG">Configuration error</option>
+      <option value="ERROR_UNRESPONSIVE">Silvair firmware unresponsive</option>
+      <option value="ERROR_BACKUP">Backup failed</option>
+      <option value="ERROR_CRASH">Unexpected error (crash)</option>
     </select>
     <button onclick="applyState(document.getElementById('state-select').value)">Apply State</button>
   </div>
@@ -97,105 +60,93 @@
     <h3>Scenarios</h3>
     <button onclick="runScenario('boot')">Boot Flow</button>
     <button onclick="runScenario('provision')">Provision Flow</button>
-    <button onclick="runScenario('Bacnetrestart')">BACnet restart</button>
+    <button onclick="runScenario('bacnetConfig')">BACnet Config Flow</button>
     <button onclick="runScenario('reset')">Reset Flow</button>
+    <button onclick="runScenario('error')">Boot Flow with error</button>
   </div>
   <script>
     const ring = document.getElementById('led-ring');
-    const numLEDs = 24;
-    const leds = [];
-    let walkInterval, scenarioInterval;
-    const radius = 120;
-
-    // Create LED elements
-    for (let i = 0; i < numLEDs; i++) {
-      const led = document.createElement('div'); led.classList.add('led');
-      const angle = (i / numLEDs) * 2 * Math.PI;
-      led.style.left = `${radius + Math.cos(angle)*radius - 10}px`;
-      led.style.top  = `${radius + Math.sin(angle)*radius - 10}px`;
-      ring.appendChild(led);
-      leds.push(led);
+    const numLEDs = 24, leds = [], radius = 120;
+    let walkInterval, scenarioTimeout;
+    // Create LEDs
+    for (let i=0; i<numLEDs; i++) {
+      const d = document.createElement('div'); d.classList.add('led');
+      const a = (i/numLEDs)*2*Math.PI;
+      d.style.left = `${radius+Math.cos(a)*radius-10}px`;
+      d.style.top  = `${radius+Math.sin(a)*radius-10}px`;
+      ring.appendChild(d);
+      leds.push(d);
     }
-
-    // State configurations
+    // State definitions
     const states = {
-      OFF:                { base: '#000', walk:false, anim:'' },
-      BOOTLOADER:         { base:'rainbow', walk:false, anim:'' },
-      BOOTING:            { base:'#FFF', walk:false, anim:'rotate' },
-      BACNET_SW_UPDATE:   { base:'#00F', walk:true,  colorDot:'#FA0', anim:'' },
-      BACNET_CONFIG_UPDATE:{ base:'#00F',walk:true, colorDot:'#FF0', anim:'' },
-      USB_LOG_BACKUP:     { base:'#800080',walk:true, colorDot:'#FF0', anim:'' },
-      BACNET_SERVICE_STARTED:{ base:'#FA0',walk:false, anim:'' },
-      BACNET_REMOTE_CONFIG:{ base:'#FA0',walk:true, colorDot:'#00F', anim:'' },
-      SILVAIR_FW_STARTING:{ base:'#FF0', walk:false, anim:'rotate' },
-      UNPROVISIONED:      { base:'#FF0', walk:false, anim:'' },
-      PROVISIONED:        { base:'#0F0', walk:false, anim:'' },
-      ATTENTION:          { base:'#FF0', walk:false, anim:'blink-1hz' },
-      FULL_OPERATIONAL:   { base:'#080', walk:false, anim:'' },
-      LOG_BACKUP_REMOTE:  { base:'#800080', colorDot:'#00F', walk:false, anim:'' },
-      REMOTE_RESTART:     { base:'#800080',walk:false, anim:'blink-1hz' },
-      RESET_PRESSED:      { base:'#FFF', walk:false, anim:'blink-1hz' },
-      FACTORY_RESET:      { base:'#FFF', walk:false, anim:'blink-5hz' },
-      BACNET_ERROR_CFG:   { base:'#F00', colorDot:'#FA0', walk:false, anim:'' },
-      BACNET_ERROR_SYNTAX:{ base:'#F00', colorDot:'#FF0', walk:false, anim:'' },
-      BACNET_ERROR_NORDIC:{ base:'#F00', colorDot:'#080', walk:false, anim:'' },
-      BACNET_ERROR_CRASH: { base:'#F00', walk:false, anim:'' }
+      OFF: { base:'#000000', anim:'', walk:false },
+      BOOTLOADER: { base:'rainbow', anim:'', walk:false },
+      STARTUP_MAINTENANCE: { base:'#FFFFFF', anim:'', walk:false },
+      BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500' },
+      BACNET_SW_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500', dotCount:2 },
+      BACNET_SWCONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500', dotCount:3 },
+      NO_ACTION: { base:'#FFFFFF', anim:'pulse', walk:false },
+      RESET_FACTORY: { base:'#FFFFFF', anim:'blink-1hz', walk:false },
+      LOG_BACKUP_LOCAL: { base:'#FFA500', anim:'', walk:true, colorDot:'#0000FF' },
+      BACNET_SERVICE_STARTING: { base:'#FFA500', anim:'pulse', walk:false },
+      BACNET_SERVER_CONFIGURING: { base:'#FFA500', anim:'', walk:true, colorDot:'#000' },
+      UNPROVISIONED: { base:'#FFFF00', anim:'', walk:false },
+      ATTENTION_UNPROV: { base:'#FFFF00', anim:'blink-1hz', walk:false },
+      PROVISIONED: { base:'#00FF00', anim:'', walk:false },
+      FULL_OPERATIONAL: { base:'#008000', anim:'', walk:false },
+      ATTENTION_PROV: { base:'#00FF00', anim:'blink-1hz', walk:false },
+      LOG_BACKUP_REMOTE: { base:'#800080', anim:'', walk:true, colorDot:'#0000FF' },
+      REMOTE_RESTART: { base:'#800080', anim:'blink-1hz', walk:false },
+      ERROR_SYNTAX: { base:'#FF0000', anim:'', walk:false, colorDot:'#FFA500'},
+      ERROR_CFG: { base:'#FF0000', anim:'', walk:false, colorDot:'#FFA500', dotCount:2 },
+      ERROR_UNRESPONSIVE: { base:'#FF0000', anim:'', walk:false, colorDot:'#00FF00'},
+      ERROR_BACKUP: { base:'#FF0000', anim:'', walk:false, colorDot:'#0000FF'},
+      ERROR_CRASH: { base:'#FF0000', anim:'', walk:false }
     };
-
-    function clearIntervals() {
-      clearInterval(walkInterval);
-      clearInterval(scenarioInterval);
-    }
-
-    function applyState(name) {
-      clearIntervals();
+    function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
+    function applyState(name){
+      clearTimers();
       const cfg = states[name];
-      leds.forEach(ld => { ld.className = 'led'; ld.style.opacity = 1; });
-      leds.forEach((ld, i) => {
-        if (cfg.base === 'rainbow') {
-          ld.style.background = `hsl(${(i/numLEDs)*360},100%,50%)`;
-        } else {
-          ld.style.background = cfg.base;
-        }
+      leds.forEach(ld=>{ ld.className='led'; ld.style.opacity=1; });
+      leds.forEach((ld,i)=>{
+        ld.style.background = cfg.base==='rainbow' ? `hsl(${i/24*360},100%,50%)` : cfg.base;
         ld.baseColor = ld.style.background;
       });
-      if (cfg.colorDot) {
-        let pos = 0;
-        leds[pos].style.background = cfg.colorDot;
+      // Static dot overlay for non-walking states
+      if (!cfg.anim && cfg.colorDot) {
+        const count = cfg.dotCount || 1;
+        for (let k=0; k<count; k++) {
+          // evenly spaced dots: LED positions at multiples of 24/count
+          const idx = Math.floor(k*(numLEDs/count)) % numLEDs;
+          leds[idx].style.background = cfg.colorDot;
+        }
       }
+      // Moving dot logic
       if (cfg.walk) {
         let pos = 0;
         walkInterval = setInterval(() => {
-          leds.forEach(ld => ld.style.background = ld.baseColor);
-          leds[pos].style.background = cfg.colorDot;
+          leds.forEach(ld=>ld.style.background = ld.baseColor);
+          // place dot(s)
+          const count = cfg.dotCount || 1;
+          for (let k=0;k<count;k++) {
+            const idx = (pos + Math.floor(k*(numLEDs/count))) % numLEDs;
+            leds[idx].style.background = cfg.colorDot;
+          }
           pos = (pos + 1) % numLEDs;
         }, 200);
       }
-      if (cfg.anim) {
-        leds.forEach(ld => ld.classList.add(cfg.anim));
-      }
+      if (cfg.anim) leds.forEach(ld=>ld.classList.add(cfg.anim));
       document.getElementById('state-select').value = name;
     }
-
+    // Scenario sequences
     const scenarios = {
-      boot:           ['OFF', 'BOOTLOADER', 'BOOTING', 'BACNET_SW_UPDATE', 'BACNET_CONFIG_UPDATE', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','SILVAIR_FW_STARTING','UNPROVISIONED'],
-      provision:      ['UNPROVISIONED', 'ATTENTION', 'PROVISIONED', 'FULL_OPERATIONAL'],
-      Bacnetrestart:  ['REMOTE_RESTART', 'BACNET_SERVICE_STARTED', 'BACNET_REMOTE_CONFIG', 'BACNET_SERVICE_STARTED','UNPROVISIONED'],
-      reset:          ['RESET_PRESSED', 'FACTORY_RESET', 'BOOTLOADER', 'BOOTING', 'BACNET_SERVICE_STARTED', 'UNPROVISIONED']
+      boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
+      provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
+      bacnetConfig: ['BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING'],
+
+      reset: ['FULL_OPERATIONAL','RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED']
     };
-
-    function runScenario(key) {
-      const seq = scenarios[key];
-      clearIntervals();
-      // Recursive timed execution of sequence
-      (function nextStep(i) {
-        if (i >= seq.length) return;
-        applyState(seq[i]);
-        setTimeout(() => nextStep(i + 1), 3000);
-      })(0);
-    }
-
-    // Initialize default state
+    function runScenario(key,i=0){ const seq=scenarios[key]; if (i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
     applyState('OFF');
   </script>
 </body>
