@@ -62,7 +62,7 @@
     <button onclick="runScenario('provision')">Provision Flow</button>
     <button onclick="runScenario('bacnetConfig')">BACnet Config Flow</button>
     <button onclick="runScenario('reset')">Reset Flow</button>
-    <button onclick="runScenario('error')">Boot Flow with error</button>
+    <button onclick="runScenario('error')">Error</button>
   </div>
   <script>
     const ring = document.getElementById('led-ring');
@@ -143,8 +143,9 @@
       boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
       bacnetConfig: ['BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING'],
+      reset: ['FULL_OPERATIONAL','RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
+      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED', 'ERROR_CRASH', 'BACNET_SERVICE_STARTING','BACNET_SERVICE_STARTING','UNPROVISIONED', 'ERROR_CRASH']
 
-      reset: ['FULL_OPERATIONAL','RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED']
     };
     function runScenario(key,i=0){ const seq=scenarios[key]; if (i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
     applyState('OFF');
