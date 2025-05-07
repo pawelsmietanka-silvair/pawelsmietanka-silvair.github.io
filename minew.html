@@ -52,6 +52,7 @@
       <option value="ERROR_CFG">Configuration error</option>
       <option value="ERROR_UNRESPONSIVE">Silvair firmware unresponsive</option>
       <option value="ERROR_BACKUP">Backup failed</option>
+      <option value="ERROR_CRASH">Unexpected error (crash)</option>
     </select>
     <button onclick="applyState(document.getElementById('state-select').value)">Apply State</button>
   </div>
@@ -100,7 +101,8 @@
       ERROR_SYNTAX: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000'},
       ERROR_CFG: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:2 },
       ERROR_UNRESPONSIVE: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:3 },
-      ERROR_BACKUP: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:4}
+      ERROR_BACKUP: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:4},
+      ERROR_CRASH: { base:'#FF0000', anim:'', walk:false}
     };
 function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
     function applyState(name){
