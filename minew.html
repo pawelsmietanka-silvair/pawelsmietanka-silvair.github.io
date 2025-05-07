@@ -52,7 +52,6 @@
       <option value="ERROR_CFG">Configuration error</option>
       <option value="ERROR_UNRESPONSIVE">Silvair firmware unresponsive</option>
       <option value="ERROR_BACKUP">Backup failed</option>
-      <option value="ERROR_CRASH">Unexpected error (crash)</option>
     </select>
     <button onclick="applyState(document.getElementById('state-select').value)">Apply State</button>
   </div>
@@ -132,15 +131,31 @@ function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeou
           });
         }
       }
-      // Moving dot logic
+      // Moving dot logic with diffusion
       if (cfg.walk) {
         let pos = 0;
         walkInterval = setInterval(() => {
-          leds.forEach(ld=>ld.style.background = ld.baseColor);
+          leds.forEach(ld=>{
+            ld.style.background = ld.baseColor;
+            ld.style.boxShadow = 'none';
+          });
+          const hex = cfg.colorDot.replace('#','');
+          const dotR=parseInt(hex.substr(0,2),16);
+          const dotG=parseInt(hex.substr(2,2),16);
+          const dotB=parseInt(hex.substr(4,2),16);
           const count = cfg.dotCount || 1;
           for (let k=0; k<count; k++) {
             const idx = (pos + Math.floor(k*(numLEDs/count))) % numLEDs;
+            // center
             leds[idx].style.background = cfg.colorDot;
+            leds[idx].style.boxShadow = `0 0 12px 6px ${cfg.colorDot}`;
+            // diffusion neighbors
+            [1,2].forEach(d=>{
+              const intensity = d===1?0.5:0.25;
+              [(idx+d)%numLEDs, (idx-d+numLEDs)%numLEDs].forEach(n=>{
+                leds[n].style.background = `rgba(${dotR},${dotG},${dotB},${intensity})`;
+              });
+            });
           }
           pos = (pos + 1) % numLEDs;
         }, 200);
@@ -148,16 +163,14 @@ function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeou
       if (cfg.anim) leds.forEach(ld=>ld.classList.add(cfg.anim));
       document.getElementById('state-select').value = name;
     }
-    // Scenario sequences
     const scenarios = {
       boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
       bacnetConfig: ['BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING'],
       reset: ['FULL_OPERATIONAL','RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
-      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED', 'ERROR_CRASH', 'BACNET_SERVICE_STARTING','BACNET_SERVICE_STARTING','UNPROVISIONED', 'ERROR_CRASH']
-
+      error: ['ERROR_SYNTAX','ERROR_CFG','ERROR_UNRESPONSIVE','ERROR_BACKUP','ERROR_CRASH']
     };
-    function runScenario(key,i=0){ const seq=scenarios[key]; if (i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
+    function runScenario(key,i=0){ const seq=scenarios[key]; if(i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
     applyState('OFF');
   </script>
 </body>
