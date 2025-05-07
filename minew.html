@@ -59,9 +59,10 @@
     <h3>Scenarios</h3>
     <button onclick="runScenario('boot')">Boot Flow</button>
     <button onclick="runScenario('provision')">Provision Flow</button>
-    <button onclick="runScenario('bacnetConfig')">BACnet Config Flow</button>
     <button onclick="runScenario('reset')">Reset Flow</button>
-    <button onclick="runScenario('error')">Error</button>
+    <button onclick="runScenario('maintenance')">Maintenance Flow</button>
+    <button onclick="runScenario('error')">Error Flow</button>
+    <button onclick="runScenario('errors')">Errors</button>
   </div>
   <script>
     const ring = document.getElementById('led-ring');
@@ -166,9 +167,10 @@ function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeou
     const scenarios = {
       boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
-      bacnetConfig: ['BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING'],
       reset: ['FULL_OPERATIONAL','RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
-      error: ['ERROR_SYNTAX','ERROR_CFG','ERROR_UNRESPONSIVE','ERROR_BACKUP','ERROR_CRASH']
+      maintenance: ['FULL_OPERATIONAL', 'LOG_BACKUP_REMOTE', 'ERROR_BACKUP', 'BACNET_SERVICE_STARTING', 'PROVISIONED','FULL_OPERATIONAL' ],
+      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG', 'BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG'],      
+      errors: ['ERROR_SYNTAX','ERROR_CFG','ERROR_UNRESPONSIVE','ERROR_BACKUP','ERROR_CRASH']
     };
     function runScenario(key,i=0){ const seq=scenarios[key]; if(i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
     applyState('OFF');
