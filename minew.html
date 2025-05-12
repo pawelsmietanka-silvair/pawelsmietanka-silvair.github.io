@@ -8,184 +8,189 @@
     body { font-family: sans-serif; text-align: center; margin: 20px; background-color: #121212; color: #EEEEEE; }
     #led-ring { position: relative; width: 300px; height: 300px; margin: 20px auto; }
     .led { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #000; transition: background 0.3s, opacity 0.3s; }
-    @keyframes rotate-sweep { 0% { background: rgba(255,255,255,0.1); } 50% { background: rgba(255,255,255,0.8); } 100% { background: rgba(255,255,255,0.1); } }
+    @keyframes rotate-sweep { 0%,100% { background: rgba(255,255,255,0.1); } 50% { background: rgba(255,255,255,0.8); } }
     @keyframes blink-1hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
-    @keyframes blink-5hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
-    @keyframes strobe-10hz { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
-    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-    .rotate      { animation: rotate-sweep 3s linear infinite; }
+    @keyframes pulse       { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+    .rotate      { animation: rotate-sweep 2s linear infinite; }
     .blink-1hz   { animation: blink-1hz   1s step-end infinite; }
-    .blink-5hz   { animation: blink-5hz   0.2s step-end infinite; }
-    .strobe-10hz { animation: strobe-10hz 0.1s step-end infinite; }
-    .pulse       { animation: pulse 2s ease-in-out infinite; }
-    #controls select, #controls button, #controls .nav-btn { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; }
-    #controls button:hover, #controls .nav-btn:hover { background-color: #444; }
-    #scenarios button { padding: 6px 12px; margin: 4px; background: #222; color: #EEE; border: 1px solid #555; border-radius: 4px; }
+    .pulse       { animation: pulse       2s ease-in-out infinite; }
+    #controls select, #controls .nav-btn { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
+    #controls .nav-btn:hover { background-color: #444; }
+    #scenarios button { padding: 6px 12px; margin: 4px; background: #222; color: #EEE; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
     #scenarios button:hover { background: #333; }
   </style>
 </head>
 <body>
   <h1>Minew G1-E LED Status Prototype</h1>
-  <p>Trigger LED states via the <strong>State selector</strong> or run <strong>Scenarios</strong> below.</p>
-  <div id="led-ring"></div>
-  <div id="controls">
+  <p>Use the State selector, Next/Previous, or Scenarios to trigger LED states.</p>
 
+  <div id="led-ring"></div>
+
+  <div id="controls">
     <button class="nav-btn" id="prev-btn">&larr; Previous</button>
     <select id="state-select"></select>
     <button class="nav-btn" id="next-btn">Next &rarr;</button>
-
   </div>
+
   <div id="scenarios">
     <h3>Scenarios</h3>
-    <button onclick="runScenario('boot')">Boot Flow</button>
-    <button onclick="runScenario('provision')">Provision Flow</button>
-    <button onclick="runScenario('reset')">Reset Flow</button>
-    <button onclick="runScenario('maintenance')">Maintenance Flow</button>
-    <button onclick="runScenario('error')">Error Flow</button>
-    <button onclick="runScenario('errors')">Errors</button>
+    <button data-scenario="boot">Boot Flow</button>
+    <button data-scenario="provision">Provision Flow</button>
+    <button data-scenario="bacnetConfig">BACnet Config Flow</button>
+    <button data-scenario="swUpdate">SW Update Flow</button>
+    <button data-scenario="reset">Reset Flow</button>
+    <button data-scenario="maintenance">Maintenance</button>
+    <button data-scenario="error">Error</button>
+    <button data-scenario="errors">Errors</button>
   </div>
-  <script>
 
+  <script>
     const ring = document.getElementById('led-ring');
     const stateSelect = document.getElementById('state-select');
-    const applyBtn   = document.getElementById('apply-btn');
-    const prevBtn    = document.getElementById('prev-btn');
-    const nextBtn    = document.getElementById('next-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
     const scenarioButtons = document.querySelectorAll('#scenarios button');
-
-    const numLEDs = 24, leds = [], radius = 120;
+    const numLEDs = 24, leds = [];
     let walkInterval, scenarioTimeout;
-    // Create LEDs
-    for (let i=0; i<numLEDs; i++) {
-      const d = document.createElement('div'); d.classList.add('led');
-      const a = (i/numLEDs)*2*Math.PI;
-      d.style.left = `${radius+Math.cos(a)*radius-10}px`;
-      d.style.top  = `${radius+Math.sin(a)*radius-10}px`;
-      ring.appendChild(d);
-      leds.push(d);
-    }
-    // State definitions
-    const states = {
-      OFF: { base:'#000000', anim:'', walk:false },
-      BOOTLOADER: { base:'rainbow', anim:'', walk:false },
-      STARTUP_MAINTENANCE: { base:'#FFFFFF', anim:'', walk:false },
-      BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500' },
-      SW_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500', dotCount:2 },
-      ERROR_BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000' },
-      ERROR_SW_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:2 },
-      NO_ACTION: { base:'#FFFFFF', anim:'pulse', walk:false },
-      RESET_FACTORY: { base:'#FFFFFF', anim:'blink-1hz', walk:false },
-      LOG_BACKUP_LOCAL: { base:'#FFA500', anim:'', walk:true, colorDot:'#0000FF' },
-      BACNET_SERVICE_STARTING: { base:'#FFA500', anim:'pulse', walk:false },
-      BACNET_SERVER_CONFIGURING: { base:'#FFA500', anim:'', walk:true, colorDot:'#000' },
-      UNPROVISIONED: { base:'#FFFF00', anim:'', walk:false },
-      ATTENTION_UNPROV: { base:'#FFFF00', anim:'blink-1hz', walk:false },
-      PROVISIONED: { base:'#00FF00', anim:'', walk:false },
-      FULL_OPERATIONAL: { base:'#008000', anim:'', walk:false },
-      ATTENTION_PROV: { base:'#00FF00', anim:'blink-1hz', walk:false },
-      LOG_BACKUP_REMOTE: { base:'#800080', anim:'', walk:true, colorDot:'#0000FF' },
-      REMOTE_RESTART: { base:'#800080', anim:'blink-1hz', walk:false },
-      ERROR_SYNTAX: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000'},
-      ERROR_CFG: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:2 },
-      ERROR_UNRESPONSIVE: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:3 },
-      ERROR_BACKUP: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:4},
-      ERROR_CRASH: { base:'#FF0000', anim:'', walk:false}
-    };
 
+    // Utility with caching for hexToRgb
+    const rgbCache = {};
+    function hexToRgb(hex) {
+      if (rgbCache[hex]) return rgbCache[hex];
+      const [r,g,b] = hex.replace('#','').match(/.{2}/g).map(x=>parseInt(x,16));
+      return rgbCache[hex] = {r,g,b};
+    }
+
+    const blendColor = (base, overlay, alpha) => ({
+      r: Math.round(base.r*(1-alpha) + overlay.r*alpha),
+      g: Math.round(base.g*(1-alpha) + overlay.g*alpha),
+      b: Math.round(base.b*(1-alpha) + overlay.b*alpha)
+    });
+
+    // Apply diffusion overlay (static or offset)
+    function applyDiffusionOverlay(color, count=1, offset=0) {
+      const dotRgb = hexToRgb(color);
+      for (let j = 0; j < count; j++) {
+        const idx = (offset + Math.floor(j * (numLEDs / count))) % numLEDs;
+        leds[idx].style.background = color;
+        leds[idx].style.boxShadow = `0 0 24px 12px ${color}`;
+        [1,2].forEach(d => {
+          const alpha = d === 1 ? 0.5 : 0.25;
+          [(idx + d) % numLEDs, (idx - d + numLEDs) % numLEDs].forEach(n => {
+            const baseRgb = leds[n].baseRgb;
+            const blended = blendColor(baseRgb, dotRgb, alpha);
+            leds[n].style.background = `rgb(${blended.r},${blended.g},${blended.b})`;
+          });
+        });
+      }
+    }
+
+    // Create LEDs
+    for (let i = 0; i < numLEDs; i++) {
+      const led = document.createElement('div'); led.classList.add('led');
+      const angle = (i/numLEDs)*2*Math.PI;
+      led.style.left = `${150 + Math.cos(angle)*120 - 10}px`;
+      led.style.top  = `${150 + Math.sin(angle)*120 - 10}px`;
+      ring.appendChild(led);
+      leds.push(led);
+    }
+
+    // State definitions with configurable durations
+    const states = {
+      OFF:                        { base:'#000000', anim:'', walk:false, duration: 3 },
+      BOOTLOADER:                 { base:'rainbow', anim:'', walk:false, duration: 3 },
+      STARTUP_MAINTENANCE:        { base:'#FFFFFF', anim:'', walk:false, duration: 3 },
+      BACNET_CONFIG_UPDATE:       { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:1, duration: 3 },
+      SW_UPDATE:                  { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:2, duration: 30 },
+      ERROR_BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:1, duration: 3 },
+      ERROR_SW_UPDATE:            { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:2, duration: 3 },
+      NO_ACTION:                  { base:'#FFFFFF', anim:'pulse', walk:false, duration: 3 },
+      RESET_FACTORY:              { base:'#FFFFFF', anim:'blink-1hz', walk:false, duration: 3 },
+      LOG_BACKUP_LOCAL:           { base:'#FFA500', anim:'', walk:true,  colorDot:'#0000FF', dotCount:1, duration: 3 },
+      BACNET_SERVICE_STARTING:    { base:'#FFA500', anim:'pulse', walk:false, duration: 3 },
+      BACNET_SERVER_CONFIGURING:  { base:'#FFA500', anim:'', walk:true,  colorDot:'#000000', dotCount:1, duration: 3 },
+      UNPROVISIONED:              { base:'#FFFF00', anim:'', walk:false, duration: 3 },
+      ATTENTION_UNPROV:           { base:'#FFFF00', anim:'blink-1hz', walk:false, duration: 3 },
+      PROVISIONED:                { base:'#00FF00', anim:'', walk:false, duration: 3 },
+      FULL_OPERATIONAL:           { base:'#008000', anim:'', walk:false, duration: 3 },
+      ATTENTION_PROV:             { base:'#00FF00', anim:'blink-1hz', walk:false, duration: 3 },
+      LOG_BACKUP_REMOTE:          { base:'#800080', anim:'', walk:true,  colorDot:'#0000FF', dotCount:1, duration: 3 },
+      REMOTE_RESTART:             { base:'#800080', anim:'blink-1hz', walk:false, duration: 3 },
+      ERROR_SYNTAX:               { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:1, duration: 3 },
+      ERROR_CFG:                  { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:2, duration: 3 },
+      ERROR_UNRESPONSIVE:         { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:3, duration: 3 },
+      ERROR_BACKUP:               { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:4, duration: 3 },
+      ERROR_CRASH:                { base:'#FF0000', anim:'', walk:false, duration: 3 }
+    };
     const stateKeys = Object.keys(states);
 
     // Populate selector
+    stateSelect.innerHTML = '';
     stateKeys.forEach(key => {
       const opt = document.createElement('option'); opt.value = key; opt.textContent = key.replace(/_/g,' ');
       stateSelect.appendChild(opt);
     });
 
+    // Clear any walk animation
+    function clearWalk() { clearInterval(walkInterval); leds.forEach(ld=>ld.className='led'); }
 
-    function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
-    function applyState(name){
-      clearTimers();
-      const cfg = states[name];
-      leds.forEach(ld=>{ ld.className='led'; ld.style.opacity=1; ld.style.boxShadow='none'; });
-      leds.forEach((ld,i)=>{
-        ld.style.background = cfg.base==='rainbow' ? `hsl(${i/24*360},100%,50%)` : cfg.base;
-        ld.baseColor = ld.style.background;
-      });
-      // Static dot overlay for non-walking states
-      if (!cfg.walk && cfg.colorDot) {
-        const hex = cfg.colorDot.replace('#','');
-        const r = parseInt(hex.substr(0,2),16);
-        const g = parseInt(hex.substr(2,2),16);
-        const b = parseInt(hex.substr(4,2),16);
-        const count = cfg.dotCount || 1;
-        for (let k=0; k<count; k++) {
-          const idx = Math.floor(k*(numLEDs/count)) % numLEDs;
-          // center
-          leds[idx].style.background = cfg.colorDot;
-          leds[idx].style.boxShadow = `0 0 12px 6px ${cfg.colorDot}`;
-          // diffusion neighbors
-          [1,2].forEach(d=>{
-            const intensity = d===1?0.5:0.25;
-            [ (idx+d)%numLEDs, (idx-d+numLEDs)%numLEDs ].forEach(n=>{
-              leds[n].style.background = `rgba(${r},${g},${b},${intensity})`;
-            });
-          });
+    // Apply state
+    function applyState(key) {
+      clearWalk(); clearTimeout(scenarioTimeout);
+      const cfg = states[key];
+      // Base ring
+      leds.forEach((ld,i) => {
+        if (cfg.base === 'rainbow') {
+          ld.style.background = `hsl(${(i/numLEDs)*360},100%,50%)`;
+          ld.baseRgb = {r:255,g:255,b:255};
+        } else {
+          ld.style.background = cfg.base;
+          ld.baseRgb = hexToRgb(cfg.base);
         }
-      }
-      // Moving dot logic with diffusion
+        ld.style.boxShadow = '';
+      });
+      // Static overlay
+      if (cfg.colorDot) applyDiffusionOverlay(cfg.colorDot, cfg.dotCount||1, 0);
+      // Walk overlay
       if (cfg.walk) {
         let pos = 0;
         walkInterval = setInterval(() => {
-          leds.forEach(ld=>{
-            ld.style.background = ld.baseColor;
-            ld.style.boxShadow = 'none';
-          });
-          const hex = cfg.colorDot.replace('#','');
-          const dotR=parseInt(hex.substr(0,2),16);
-          const dotG=parseInt(hex.substr(2,2),16);
-          const dotB=parseInt(hex.substr(4,2),16);
-          const count = cfg.dotCount || 1;
-          for (let k=0; k<count; k++) {
-            const idx = (pos + Math.floor(k*(numLEDs/count))) % numLEDs;
-            // center
-            leds[idx].style.background = cfg.colorDot;
-            leds[idx].style.boxShadow = `0 0 12px 6px ${cfg.colorDot}`;
-            // diffusion neighbors
-            [1,2].forEach(d=>{
-              const intensity = d===1?0.5:0.25;
-              [(idx+d)%numLEDs, (idx-d+numLEDs)%numLEDs].forEach(n=>{
-                leds[n].style.background = `rgba(${dotR},${dotG},${dotB},${intensity})`;
-              });
-            });
-          }
-          pos = (pos + 1) % numLEDs;
-        }, 200);
+          leds.forEach(ld=>{ ld.style.background = `rgb(${ld.baseRgb.r},${ld.baseRgb.g},${ld.baseRgb.b})`; ld.style.boxShadow=''; });
+          applyDiffusionOverlay(cfg.colorDot, cfg.dotCount||1, pos);
+          pos = (pos+1)%numLEDs;
+        },200);
       }
+      // Animations
       if (cfg.anim) leds.forEach(ld=>ld.classList.add(cfg.anim));
-      document.getElementById('state-select').value = name;
+      stateSelect.value = key;
     }
 
-    // Next / Prev
-    document.getElementById('next-btn').onclick = () => {
-      const idx = stateKeys.indexOf(stateSelect.value);
-      applyState(stateKeys[(idx+1)%stateKeys.length]);
-    };
-    document.getElementById('prev-btn').onclick = () => {
-      const idx = stateKeys.indexOf(stateSelect.value);
-      applyState(stateKeys[(idx-1+stateKeys.length)%stateKeys.length]);
-    };
-
-    // Change on select
+    // Navigation
+    prevBtn.onclick = () => applyState(stateKeys[(stateKeys.indexOf(stateSelect.value)-1+stateKeys.length)%stateKeys.length]);
+    nextBtn.onclick = () => applyState(stateKeys[(stateKeys.indexOf(stateSelect.value)+1)%stateKeys.length]);
     stateSelect.onchange = () => applyState(stateSelect.value);
 
+    // Scenarios runner using durations
     const scenarios = {
       boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
+      swUpdate: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','SW_UPDATE','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       reset: ['RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
-      maintenance: ['LOG_BACKUP_REMOTE', 'ERROR_BACKUP', 'BACNET_SERVICE_STARTING', 'PROVISIONED','FULL_OPERATIONAL' ],
-      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG', 'BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG'],      
+      maintenance: ['LOG_BACKUP_REMOTE','ERROR_BACKUP','BACNET_SERVICE_STARTING','PROVISIONED','FULL_OPERATIONAL'],
+      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG','BACNET_SERVICE_STARTING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG'],
       errors: ['ERROR_SYNTAX','ERROR_CFG','ERROR_UNRESPONSIVE','ERROR_BACKUP','ERROR_CRASH']
     };
-    function runScenario(key,i=0){ const seq=scenarios[key]; if(i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
+    function runScenario(key,i=0){
+      clearTimeout(scenarioTimeout);
+      const seq = scenarios[key]||[];
+      if(i>=seq.length) return;
+      applyState(seq[i]);
+      const dur = (states[seq[i]].duration||3)*1000;
+      scenarioTimeout = setTimeout(() => runScenario(key,i+1), dur);
+    }
+    scenarioButtons.forEach(btn => btn.onclick = () => runScenario(btn.dataset.scenario));
+
+    // Initialize
     applyState('OFF');
   </script>
 </body>
