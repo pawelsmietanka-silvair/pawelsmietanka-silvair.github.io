@@ -13,13 +13,13 @@
     @keyframes blink-5hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
     @keyframes strobe-10hz { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
     @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-    .rotate      { animation: rotate-sweep 2s linear infinite; }
+    .rotate      { animation: rotate-sweep 3s linear infinite; }
     .blink-1hz   { animation: blink-1hz   1s step-end infinite; }
     .blink-5hz   { animation: blink-5hz   0.2s step-end infinite; }
     .strobe-10hz { animation: strobe-10hz 0.1s step-end infinite; }
     .pulse       { animation: pulse 2s ease-in-out infinite; }
-    #controls select, #controls button { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; }
-    #controls button:hover { background-color: #444; }
+    #controls select, #controls button, #controls .nav-btn { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; }
+    #controls button:hover, #controls .nav-btn:hover { background-color: #444; }
     #scenarios button { padding: 6px 12px; margin: 4px; background: #222; color: #EEE; border: 1px solid #555; border-radius: 4px; }
     #scenarios button:hover { background: #333; }
   </style>
@@ -29,32 +29,11 @@
   <p>Trigger LED states via the <strong>State selector</strong> or run <strong>Scenarios</strong> below.</p>
   <div id="led-ring"></div>
   <div id="controls">
-    <select id="state-select">
-      <option value="OFF">Power Off</option>
-      <option value="BOOTLOADER">Bootloader</option>
-      <option value="STARTUP_MAINTENANCE">Startup Maintenance Starting</option>
-      <option value="BACNET_CONFIG_UPDATE">Updating BACnet configuration file </option>
-      <option value="BACNET_SW_UPDATE">Updating BACnet software</option>
-      <option value="BACNET_SWCONFIG_UPDATE">Updating BACnet configuration file and software</option>
-      <option value="NO_ACTION">No action</option>
-      <option value="RESET_FACTORY">Resetting to factory settings</option>
-      <option value="LOG_BACKUP_LOCAL">Logs backup to USB (button press)</option>
-      <option value="BACNET_SERVICE_STARTING">BACnet service starting</option>
-      <option value="BACNET_SERVER_CONFIGURING">Updating BACnet server configuration</option>
-      <option value="UNPROVISIONED">Unprovisioned</option>
-      <option value="ATTENTION_UNPROV">Attention in Unprovisioned</option>
-      <option value="PROVISIONED">Provisioned</option>
-      <option value="FULL_OPERATIONAL">Full operational</option>
-      <option value="ATTENTION_PROV">Attention in Provisioned</option>
-      <option value="LOG_BACKUP_REMOTE">Logs backup to USB (via BACnet command)</option>
-      <option value="REMOTE_RESTART">Restarting Silvair firmware</option>
-      <option value="ERROR_SYNTAX">Configuration file error</option>
-      <option value="ERROR_CFG">Configuration error</option>
-      <option value="ERROR_UNRESPONSIVE">Silvair firmware unresponsive</option>
-      <option value="ERROR_BACKUP">Backup failed</option>
-      <option value="ERROR_CRASH">Unexpected error (crash)</option>
-    </select>
-    <button onclick="applyState(document.getElementById('state-select').value)">Apply State</button>
+
+    <button class="nav-btn" id="prev-btn">&larr; Previous</button>
+    <select id="state-select"></select>
+    <button class="nav-btn" id="next-btn">Next &rarr;</button>
+
   </div>
   <div id="scenarios">
     <h3>Scenarios</h3>
@@ -66,7 +45,14 @@
     <button onclick="runScenario('errors')">Errors</button>
   </div>
   <script>
+
     const ring = document.getElementById('led-ring');
+    const stateSelect = document.getElementById('state-select');
+    const applyBtn   = document.getElementById('apply-btn');
+    const prevBtn    = document.getElementById('prev-btn');
+    const nextBtn    = document.getElementById('next-btn');
+    const scenarioButtons = document.querySelectorAll('#scenarios button');
+
     const numLEDs = 24, leds = [], radius = 120;
     let walkInterval, scenarioTimeout;
     // Create LEDs
@@ -84,8 +70,9 @@
       BOOTLOADER: { base:'rainbow', anim:'', walk:false },
       STARTUP_MAINTENANCE: { base:'#FFFFFF', anim:'', walk:false },
       BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500' },
-      BACNET_SW_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500', dotCount:2 },
-      BACNET_SWCONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500', dotCount:3 },
+      SW_UPDATE: { base:'#FFFFFF', anim:'', walk:true, colorDot:'#FFA500', dotCount:2 },
+      ERROR_BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000' },
+      ERROR_SW_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:2 },
       NO_ACTION: { base:'#FFFFFF', anim:'pulse', walk:false },
       RESET_FACTORY: { base:'#FFFFFF', anim:'blink-1hz', walk:false },
       LOG_BACKUP_LOCAL: { base:'#FFA500', anim:'', walk:true, colorDot:'#0000FF' },
@@ -104,7 +91,17 @@
       ERROR_BACKUP: { base:'#000000', anim:'', walk:false, colorDot:'#FF0000', dotCount:4},
       ERROR_CRASH: { base:'#FF0000', anim:'', walk:false}
     };
-function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
+
+    const stateKeys = Object.keys(states);
+
+    // Populate selector
+    stateKeys.forEach(key => {
+      const opt = document.createElement('option'); opt.value = key; opt.textContent = key.replace(/_/g,' ');
+      stateSelect.appendChild(opt);
+    });
+
+
+    function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeout); }
     function applyState(name){
       clearTimers();
       const cfg = states[name];
@@ -166,12 +163,26 @@ function clearTimers(){ clearInterval(walkInterval); clearTimeout(scenarioTimeou
       if (cfg.anim) leds.forEach(ld=>ld.classList.add(cfg.anim));
       document.getElementById('state-select').value = name;
     }
+
+    // Next / Prev
+    document.getElementById('next-btn').onclick = () => {
+      const idx = stateKeys.indexOf(stateSelect.value);
+      applyState(stateKeys[(idx+1)%stateKeys.length]);
+    };
+    document.getElementById('prev-btn').onclick = () => {
+      const idx = stateKeys.indexOf(stateSelect.value);
+      applyState(stateKeys[(idx-1+stateKeys.length)%stateKeys.length]);
+    };
+
+    // Change on select
+    stateSelect.onchange = () => applyState(stateSelect.value);
+
     const scenarios = {
-      boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
+      boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
-      reset: ['FULL_OPERATIONAL','RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
-      maintenance: ['FULL_OPERATIONAL', 'LOG_BACKUP_REMOTE', 'ERROR_BACKUP', 'BACNET_SERVICE_STARTING', 'PROVISIONED','FULL_OPERATIONAL' ],
-      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SWCONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG', 'BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG'],      
+      reset: ['RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
+      maintenance: ['LOG_BACKUP_REMOTE', 'ERROR_BACKUP', 'BACNET_SERVICE_STARTING', 'PROVISIONED','FULL_OPERATIONAL' ],
+      error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG', 'BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG'],      
       errors: ['ERROR_SYNTAX','ERROR_CFG','ERROR_UNRESPONSIVE','ERROR_BACKUP','ERROR_CRASH']
     };
     function runScenario(key,i=0){ const seq=scenarios[key]; if(i>=seq.length) return; applyState(seq[i]); scenarioTimeout = setTimeout(() => runScenario(key,i+1), 3000); }
