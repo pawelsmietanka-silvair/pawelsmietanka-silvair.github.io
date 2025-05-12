@@ -101,7 +101,8 @@
       BOOTLOADER:                 { base:'rainbow', anim:'', walk:false, duration: 3 },
       STARTUP_MAINTENANCE:        { base:'#FFFFFF', anim:'', walk:false, duration: 3 },
       BACNET_CONFIG_UPDATE:       { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:1, duration: 3 },
-      SW_UPDATE:                  { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:2, duration: 30 },
+      SW_UPDATE_INIT:             { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:2, duration: 3 },
+      SW_UPDATE:                  { base:'#FFFFFF', anim:'', walk:false,  colorDot:'#FFA500', dotCount:2, duration: 30 },
       ERROR_BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:1, duration: 3 },
       ERROR_SW_UPDATE:            { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:2, duration: 3 },
       NO_ACTION:                  { base:'#FFFFFF', anim:'pulse', walk:false, duration: 3 },
@@ -174,7 +175,7 @@
     const scenarios = {
       boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
-      swUpdate: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','SW_UPDATE','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
+      swUpdate: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','SW_UPDATE_INIT', 'SW_UPDATE','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       reset: ['RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       maintenance: ['LOG_BACKUP_REMOTE','ERROR_BACKUP','BACNET_SERVICE_STARTING','PROVISIONED','FULL_OPERATIONAL'],
       error: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG','BACNET_SERVICE_STARTING','BACNET_SERVICE_STARTING','UNPROVISIONED','ERROR_CFG'],
