@@ -107,12 +107,13 @@
       ERROR_BACNET_CONFIG_UPDATE: { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:1, duration: 3 },
       ERROR_SW_UPDATE:            { base:'#FFFFFF', anim:'', walk:false, colorDot:'#FF0000', dotCount:2, duration: 3 },     
       RESET_FACTORY:              { base:'#FFFFFF', anim:'blink-1hz', walk:false, duration: 3 },
-      LOG_BACKUP_LOCAL:           { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#0000FF', dotCount:1, duration: 3 },
-      BACNET_SERVICE_STARTING:    { base:'#FFFF00', anim:'pulse', walk:false, duration: 3 },
-      BACNET_SERVER_CONFIG_UPDATE:{ base:'#FFFF00', anim:'', walk:true,  colorDot:'#FFA500', dotCount:1, duration: 3 },
-      BACNET_SERVER_CONFIGURING:  { base:'#FFFF00', anim:'', walk:true,  colorDot:'#FFA500', dotCount:2, duration: 3 },
-      UNPROVISIONED:              { base:'#FFFF00', anim:'', walk:false, duration: 3 },
-      ATTENTION_UNPROV:           { base:'#FFFF00', anim:'blink-1hz', walk:false, duration: 3 },
+      LOG_BACKUP_BUTTON:          { base:'#FFFFFF', anim:'', walk:true,  colorDot:'#0000FF', dotCount:1, duration: 3 },
+      BACNET_SERVICE_STARTING:    { base:'#00FFFF', anim:'pulse', walk:false, duration: 3 },
+      BACNET_SERVER_CONFIG_UPDATE:{ base:'#00FFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:1, duration: 3 },
+      BACNET_SERVER_CONFIGURING:  { base:'#00FFFF', anim:'', walk:true,  colorDot:'#FFA500', dotCount:2, duration: 3 },
+      SILVAIR_FW_STARTING:        { base:'#FFA500', anim:'pulse', walk:false, duration: 3 },
+      UNPROVISIONED:              { base:'#FFA500', anim:'', walk:false, duration: 3 },
+      ATTENTION_UNPROV:           { base:'#FFA500', anim:'blink-1hz', walk:false, duration: 3 },
       PROVISIONED:                { base:'#00FF00', anim:'', walk:false, duration: 3 },
       FULL_OPERATIONAL:           { base:'#008000', anim:'', walk:false, duration: 3 },
       ATTENTION_PROV:             { base:'#00FF00', anim:'blink-1hz', walk:false, duration: 3 },
@@ -174,7 +175,7 @@
 
     // Scenarios runner using durations
     const scenarios = {
-      boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
+      boot: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','SILVAIR_FW_STARTING','UNPROVISIONED'],
       provision: ['UNPROVISIONED','ATTENTION_UNPROV','PROVISIONED','FULL_OPERATIONAL'],
       swUpdate: ['OFF','BOOTLOADER','STARTUP_MAINTENANCE','SW_UPDATE_INIT', 'SW_UPDATE','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_CONFIG_UPDATE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
       reset: ['RESET_FACTORY','BOOTLOADER','STARTUP_MAINTENANCE','BACNET_SERVICE_STARTING','BACNET_SERVER_CONFIGURING','BACNET_SERVICE_STARTING','UNPROVISIONED'],
