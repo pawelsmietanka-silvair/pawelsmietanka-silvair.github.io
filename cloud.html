@@ -48,6 +48,7 @@
     <button data-scenario="connected">Connected</button>
     <button data-scenario="connectivity_loss">Connectivity Loss</button>
     <button data-scenario="full">Full flow</button>
+    <button data-scenario="full_connected">Full (connected)</button>
   </div>
 
   <script>
@@ -92,39 +93,34 @@
         duration: 10
       },
       UNPROV_OFFLINE: {
-        base: '#FFA500',
+        base: '#FFFFFF',
         anim: 'pulse',
         duration: 5
       },
       UNPROV_ONLINE: {
-        base: '#FFA500',
+        base: '#FFFFFF',
         anim: '',
         duration: 5
       },
       ATTENTION_UNPROV: {
-        base: '#FFA500',
+        base: '#FFFFFF',
         anim: 'blink-1hz',
         duration: 3
       },
       PROV_OFFLINE: {
-        base: '#FF0000',
+        base: '#FFA500',
         anim: 'pulse',
         duration: 3
       },
       ATTENTION_PROV_OFFLINE: {
-        base: '#FF0000',
+        base: '#FFA500',
         anim: 'blink-1hz',
         duration: 3
       },
       PROV_ONLINE: {
         base: '#00FF00',
         anim: '',
-        duration: 10
-      },
-      PROV_ONLINE_DIMMED: {
-        base: '#00FF00',
-        anim: '',
-        duration: 5,
+        duration: 10,
         dimmed: true
       },
       ATTENTION_PROV_ONLINE: {
@@ -246,12 +242,22 @@
         'ATTENTION_UNPROV',
         'UNPROV_OFFLINE',
         'PROV_OFFLINE',
-        'ATTENTION_PROV_OFFLINE',
-        'PROV_OFFLINE',
         'PROV_ONLINE',
-        'PROV_ONLINE_DIMMED',
         'ATTENTION_PROV_ONLINE'
-      ]
+      ],
+      
+      full_connected: [
+        'OFF',
+        'BOOTLOADER',
+        'UNPROV_OFFLINE',
+        'UNPROV_ONLINE',
+        'ATTENTION_UNPROV',
+        'UNPROV_ONLINE',
+        'PROV_ONLINE',
+        'ATTENTION_PROV_ONLINE',
+        'PROV_ONLINE'
+      ],
+
     };
 
     function runScenario(key, i = 0) {
