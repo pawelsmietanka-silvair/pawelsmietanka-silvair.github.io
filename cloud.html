@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Silvair Cloud Gateway LED Status Prototype</title>
+  <title>Minew G1-E LED Status Prototype</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin: 20px; background-color: #121212; color: #EEEEEE; }
     #led-ring { position: relative; width: 300px; height: 300px; margin: 20px auto; filter: drop-shadow(0 0 10px rgba(255,255,255,0.08)); }
@@ -119,9 +119,13 @@
       PROV_ONLINE: {
         base: '#00FF00',
         anim: '',
-        duration: 12,
-        dimAfter: 10000,
-        dimOpacity: 0.3
+        duration: 10
+      },
+      PROV_ONLINE_DIMMED: {
+        base: '#00FF00',
+        anim: '',
+        duration: 5,
+        dimmed: true
       },
       ATTENTION_PROV_ONLINE: {
         base: '#00FF00',
@@ -186,22 +190,18 @@
           ld.style.filter = 'blur(0.4px)';
         });
       } else {
-        applyGlow(cfg.base, false);
+        applyGlow(cfg.base, cfg.dimmed);
       }
 
       if (cfg.anim) {
         leds.forEach(ld => ld.classList.add(cfg.anim));
       }
 
-      if (cfg.dimAfter) {
-        dimTimeout = setTimeout(() => {
-          leds.forEach(ld => {
-            ld.style.transition = 'opacity 0.5s, box-shadow 0.5s, filter 0.5s';
-            ld.style.opacity = String(cfg.dimOpacity ?? 0.3);
-            ld.style.filter = 'blur(0.15px)';
-          });
-          applyGlow(cfg.base, true);
-        }, cfg.dimAfter);
+      if (cfg.dimmed) {
+        leds.forEach(ld => {
+          ld.style.opacity = '0.3';
+          ld.style.filter = 'blur(0.15px)';
+        });
       }
 
       stateSelect.value = key;
@@ -232,10 +232,11 @@
       ],
       connected: [
         'PROV_OFFLINE',
-        'PROV_ONLINE'
+        'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED'
       ],
       connectivity_loss: [
-        'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED',
         'PROV_OFFLINE'
       ],
       full: [
@@ -248,8 +249,8 @@
         'ATTENTION_PROV_OFFLINE',
         'PROV_OFFLINE',
         'PROV_ONLINE',
-        'ATTENTION_PROV_ONLINE',
-        'PROV_OFFLINE'
+        'PROV_ONLINE_DIMMED',
+        'ATTENTION_PROV_ONLINE'
       ]
     };
 
