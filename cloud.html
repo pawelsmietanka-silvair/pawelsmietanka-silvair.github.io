@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minew G1-E LED Status Prototype</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin: 20px; background-color: #121212; color: #EEEEEE; }
+    #led-ring { position: relative; width: 300px; height: 300px; margin: 20px auto; filter: drop-shadow(0 0 10px rgba(255,255,255,0.08)); }
+    .led {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000;
+      transition: background 0.3s, opacity 0.3s, box-shadow 0.3s, filter 0.3s;
+      opacity: 1;
+      filter: blur(0.2px);
+    }
+    @keyframes blink-1hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+    @keyframes pulse       { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+    .blink-1hz   { animation: blink-1hz 1s step-end infinite; }
+    .pulse       { animation: pulse 2s ease-in-out infinite; }
+    @keyframes rotate-ring { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .rotate-ring { animation: rotate-ring 1.4s linear infinite; transform-origin: 150px 150px; }
+    #controls select, #controls .nav-btn { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
+    #controls .nav-btn:hover { background-color: #444; }
+    #scenarios button { padding: 6px 12px; margin: 4px; background: #222; color: #EEE; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
+    #scenarios button:hover { background: #333; }
+  </style>
+</head>
+<body>
+  <h1>Minew G1-E LED Status Prototype</h1>
+  <p>Use the State selector, Next/Previous, or Scenarios to trigger LED states.</p>
+
+  <div id="led-ring"></div>
+
+  <div id="controls">
+    <button class="nav-btn" id="prev-btn">&larr; Previous</button>
+    <select id="state-select"></select>
+    <button class="nav-btn" id="next-btn">Next &rarr;</button>
+  </div>
+
+  <div id="scenarios">
+    <h3>Scenarios</h3>
+    <button data-scenario="boot">Boot</button>
+    <button data-scenario="provision">Provision</button>
+    <button data-scenario="connected">Connected</button>
+    <button data-scenario="connectivity_loss">Connectivity Loss</button>
+    <button data-scenario="full">Full flow</button>
+  </div>
+
+  <script>
+    const ring = document.getElementById('led-ring');
+    const stateSelect = document.getElementById('state-select');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const scenarioButtons = document.querySelectorAll('#scenarios button');
+    const numLEDs = 24;
+    const leds = [];
+    let scenarioTimeout;
+    let dimTimeout;
+    
+    let currentState = null;
+
+    const rgbCache = {};
+    function hexToRgb(hex) {
+      if (rgbCache[hex]) return rgbCache[hex];
+      const [r, g, b] = hex.replace('#', '').match(/.{2}/g).map(x => parseInt(x, 16));
+      return rgbCache[hex] = { r, g, b };
+    }
+
+    for (let i = 0; i < numLEDs; i++) {
+      const led = document.createElement('div');
+      led.classList.add('led');
+      const angle = (i / numLEDs) * 2 * Math.PI;
+      led.style.left = `${150 + Math.cos(angle) * 120 - 10}px`;
+      led.style.top = `${150 + Math.sin(angle) * 120 - 10}px`;
+      ring.appendChild(led);
+      leds.push(led);
+    }
+
+    const states = {
+      OFF: {
+        base: '#000000',
+        anim: '',
+        duration: 3
+      },
+      BOOTLOADER: {
+        base: 'rainbow',
+        anim: '',
+        duration: 10
+      },
+      UNPROV_OFFLINE: {
+        base: '#FFA500',
+        anim: 'pulse',
+        duration: 5
+      },
+      UNPROV_ONLINE: {
+        base: '#FFA500',
+        anim: '',
+        duration: 5
+      },
+      ATTENTION_UNPROV: {
+        base: '#FFA500',
+        anim: 'blink-1hz',
+        duration: 3
+      },
+      PROV_OFFLINE: {
+        base: '#FF0000',
+        anim: 'pulse',
+        duration: 3
+      },
+      ATTENTION_PROV_OFFLINE: {
+        base: '#FF0000',
+        anim: 'blink-1hz',
+        duration: 3
+      },
+      PROV_ONLINE: {
+        base: '#00FF00',
+        anim: '',
+        duration: 12,
+        dimAfter: 10000,
+        dimOpacity: 0.3
+      },
+      ATTENTION_PROV_ONLINE: {
+        base: '#00FF00',
+        anim: 'blink-1hz',
+        duration: 3
+      }
+    };
+
+    const stateKeys = Object.keys(states);
+
+    stateSelect.innerHTML = '';
+    stateKeys.forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = key.replace(/_/g, ' ');
+      stateSelect.appendChild(opt);
+    });
+
+    function resetLeds() {
+      ring.classList.remove('rotate-ring');
+      leds.forEach(ld => {
+        ld.className = 'led';
+        ld.style.opacity = '1';
+        ld.style.boxShadow = '';
+        ld.style.transition = 'background 0.3s, opacity 0.3s, box-shadow 0.3s, filter 0.3s';
+        ld.style.filter = 'blur(0.2px)';
+      });
+    }
+
+    function applyGlow(color, isDim = false) {
+      const glow = isDim ? 0.18 : 0.42;
+      const outer = isDim ? 8 : 16;
+      const inner = isDim ? 2 : 5;
+      leds.forEach(ld => {
+        ld.style.boxShadow = `0 0 ${inner}px ${color}, 0 0 ${outer}px ${color}`;
+      });
+    }
+
+    function applyState(key) {
+      if (!states[key]) return;
+      if (currentState === key) return;
+
+      currentState = key;
+      clearTimeout(scenarioTimeout);
+      clearTimeout(dimTimeout);
+      resetLeds();
+
+      const cfg = states[key];
+      leds.forEach((ld, i) => {
+        if (cfg.base === 'rainbow') {
+          ld.style.background = `hsl(${(i / numLEDs) * 360}, 100%, 50%)`;
+        } else {
+          ld.style.background = cfg.base;
+        }
+      });
+
+      if (cfg.base === 'rainbow') {
+        ring.classList.add('rotate-ring');
+        leds.forEach((ld, i) => {
+          const hue = (i / numLEDs) * 360;
+          ld.style.boxShadow = `0 0 6px hsla(${hue},100%,60%,0.85), 0 0 16px hsla(${hue},100%,60%,0.45)`;
+          ld.style.filter = 'blur(0.4px)';
+        });
+      } else {
+        applyGlow(cfg.base, false);
+      }
+
+      if (cfg.anim) {
+        leds.forEach(ld => ld.classList.add(cfg.anim));
+      }
+
+      if (cfg.dimAfter) {
+        dimTimeout = setTimeout(() => {
+          leds.forEach(ld => {
+            ld.style.transition = 'opacity 0.5s, box-shadow 0.5s, filter 0.5s';
+            ld.style.opacity = String(cfg.dimOpacity ?? 0.3);
+            ld.style.filter = 'blur(0.15px)';
+          });
+          applyGlow(cfg.base, true);
+        }, cfg.dimAfter);
+      }
+
+      stateSelect.value = key;
+    }
+
+    prevBtn.onclick = () => {
+      const idx = stateKeys.indexOf(stateSelect.value);
+      applyState(stateKeys[(idx - 1 + stateKeys.length) % stateKeys.length]);
+    };
+
+    nextBtn.onclick = () => {
+      const idx = stateKeys.indexOf(stateSelect.value);
+      applyState(stateKeys[(idx + 1) % stateKeys.length]);
+    };
+
+    stateSelect.onchange = () => applyState(stateSelect.value);
+
+    const scenarios = {
+      boot: [
+        'OFF',
+        'BOOTLOADER',
+        'UNPROV_OFFLINE'
+      ],
+      provision: [
+        'UNPROV_OFFLINE',
+        'ATTENTION_UNPROV',
+        'PROV_OFFLINE'
+      ],
+      connected: [
+        'PROV_OFFLINE',
+        'PROV_ONLINE'
+      ],
+      connectivity_loss: [
+        'PROV_ONLINE',
+        'PROV_OFFLINE'
+      ],
+      full: [
+        'OFF',
+        'BOOTLOADER',
+        'UNPROV_OFFLINE',
+        'ATTENTION_UNPROV',
+        'UNPROV_OFFLINE',
+        'PROV_OFFLINE',
+        'ATTENTION_PROV_OFFLINE',
+        'PROV_OFFLINE',
+        'PROV_ONLINE',
+        'ATTENTION_PROV_ONLINE',
+        'PROV_OFFLINE'
+      ]
+    };
+
+    function runScenario(key, i = 0) {
+      clearTimeout(scenarioTimeout);
+      const seq = scenarios[key] || [];
+      if (i >= seq.length) return;
+
+      currentState = null;
+      applyState(seq[i]);
+      const dur = (states[seq[i]]?.duration || 3) * 1000;
+      scenarioTimeout = setTimeout(() => runScenario(key, i + 1), dur);
+    }
+
+    scenarioButtons.forEach(btn => {
+      btn.onclick = () => runScenario(btn.dataset.scenario);
+    });
+
+    applyState('OFF');
+  </script>
+</body>
+</html>
