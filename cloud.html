@@ -49,6 +49,7 @@
     <button data-scenario="connectivity_loss">Connectivity Loss</button>
     <button data-scenario="full">Full flow</button>
     <button data-scenario="full_connected">Full (connected)</button>
+    <button data-scenario="reboot">Reboot</button>
   </div>
 
   <script>
@@ -258,6 +259,13 @@
         'ATTENTION_PROV_ONLINE',
         'PROV_ONLINE'
       ],
+      reboot: [
+        'PROV_ONLINE',
+        'OFF',
+        'BOOTLOADER',
+        'PROV_OFFLINE',
+        'PROV_ONLINE'
+      ]
 
     };
 
