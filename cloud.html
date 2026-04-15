@@ -18,9 +18,9 @@
       filter: blur(0.2px);
     }
     @keyframes blink-1hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
-    @keyframes pulse       { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+    @keyframes pulse       { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
     .blink-1hz   { animation: blink-1hz 1s step-end infinite; }
-    .pulse       { animation: pulse 2s ease-in-out infinite; }
+    .pulse       { animation: pulse 4s ease-in-out infinite; }
     @keyframes rotate-ring { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .rotate-ring { animation: rotate-ring 1.4s linear infinite; transform-origin: 150px 150px; }
     #controls select, #controls .nav-btn { padding: 8px; margin: 5px; background-color: #333; color: #EEE; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
@@ -121,6 +121,11 @@
       PROV_ONLINE: {
         base: '#00FF00',
         anim: '',
+        duration: 5
+      },
+      PROV_ONLINE_DIMMED: {
+        base: '#00FF00',
+        anim: '',
         duration: 5,
         dimmed: true
       },
@@ -196,7 +201,7 @@
 
       if (cfg.dimmed) {
         leds.forEach(ld => {
-          ld.style.opacity = '0.3';
+          ld.style.opacity = '0.1';
           ld.style.filter = 'blur(0.15px)';
         });
       }
@@ -244,8 +249,10 @@
         'UNPROV_OFFLINE',
         'PROV_OFFLINE',
         'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED',
         'ATTENTION_PROV_ONLINE',
-        'PROV_ONLINE'
+        'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED'
       ],
       
       full_connected: [
@@ -256,15 +263,18 @@
         'ATTENTION_UNPROV',
         'UNPROV_ONLINE',
         'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED',
         'ATTENTION_PROV_ONLINE',
-        'PROV_ONLINE'
+        'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED'
       ],
       reboot: [
         'PROV_ONLINE',
         'OFF',
         'BOOTLOADER',
         'PROV_OFFLINE',
-        'PROV_ONLINE'
+        'PROV_ONLINE',
+        'PROV_ONLINE_DIMMED'
       ]
 
     };
