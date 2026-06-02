@@ -17,9 +17,11 @@
       opacity: 1;
       filter: blur(0.2px);
     }
-    @keyframes blink-1hz   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+    @keyframes blink   { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
     @keyframes pulse       { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
-    .blink-1hz   { animation: blink-1hz 1s step-end infinite; }
+    .blink-1hz   { animation: blink 1s step-end infinite; }
+    .blink-2hz   { animation: blink 0.5s step-end infinite; }
+    .blink-3hz   { animation: blink 0.33s step-end infinite; }
     .pulse       { animation: pulse 4s ease-in-out infinite; }
     @keyframes rotate-ring { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .rotate-ring { animation: rotate-ring 1.4s linear infinite; transform-origin: 150px 150px; }
@@ -133,6 +135,11 @@
         base: '#00FF00',
         anim: 'blink-1hz',
         duration: 3
+      },
+      RESET1: {
+        base: '#FFFFFF',
+        anim: 'blink-2hz',
+        duration: 10
       }
     };
 
